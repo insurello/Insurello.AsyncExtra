@@ -5,8 +5,9 @@
     <PackageId>FSharp.AsyncExtra</PackageId>
     <Version>1.0.0</Version>
     <Authors>insurello</Authors>
-    <Company>Insurello</Company>
+    <Company>insurello</Company>
     <PackageDescription>AsyncResult type with helper functions</PackageDescription>
+    <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/insurello/FSharp.AsyncExtra</RepositoryUrl>
   </PropertyGroup>
 
