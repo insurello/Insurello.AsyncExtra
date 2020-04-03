@@ -43,7 +43,7 @@ jobs:
       with: 
         # Artifact name
         name: FSharp.AsyncExtra
-        path: Release
+        path: ./Release
     - uses: actions/checkout@v2
     - name: Setup .NET Core
       with:
@@ -52,6 +52,8 @@ jobs:
       env:
         NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}} github
       uses: actions/setup-dotnet@v1
+    - name: Show artifact files
+      run: ls Release
     - name: Publish the package to GPR
       run: dotnet nuget push Release/*.nupkg
 
