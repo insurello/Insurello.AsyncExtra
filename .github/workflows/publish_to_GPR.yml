@@ -1,4 +1,4 @@
-name: .NET Core
+name: Publish to GPR
 
 on:
   push:
@@ -18,16 +18,15 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.101
-        source-url: https://nuget.pkg.github.com/insurello/index.json
       env:
         NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}} github
     - name: Install dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build -p src/FSharpAsyncExtra --configuration Release --no-restore
     - name: Test
       run: dotnet test --no-restore --verbosity normal
     - name: Create the package
-      run: dotnet pack --configuration Release FSharp.AsyncExtra
+      run: dotnet pack -p src/FSharpAsyncExtra --configuration Release FSharp.AsyncExtra
     - name: Publish the package to GPR
-      run: dotnet nuget push FSharp.AsyncExtra/bin/Release/*.nupkg     
+      run: dotnet nuget push src/FSharp.AsyncExtra/bin/Release/*.nupkg --srource "github"     
