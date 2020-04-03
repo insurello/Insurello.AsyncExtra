@@ -47,7 +47,7 @@ jobs:
         path: Release
     - name: Setup .NET Core
       with:
-        dotnet-version: 3.1.101
+        dotnet-version: 3.1.3
         source-url: https://nuget.pkg.github.com/insurello/index.json
       env:
         NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}} github
