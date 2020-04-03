@@ -34,7 +34,7 @@ jobs:
         
         
   publish:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     needs: 
     - build
     steps:
@@ -47,12 +47,12 @@ jobs:
         path: Release
     - name: Setup .NET Core
       with:
-        dotnet-version: 3.1.101
         source-url: https://nuget.pkg.github.com/insurello/index.json
       env:
         NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}} github
       uses: actions/setup-dotnet@v1
     - name: Publish the package to GPR
-      run: dotnet nuget push Release/*.nupkg
-
-
+      run: dotnet nuget push Release/*.nupkg --skip-duplicate --no-symbols true --api-key $key
+      env:
+          key: ${{secrets.GITHUB_TOKEN}}
+        
