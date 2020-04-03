@@ -30,7 +30,7 @@ jobs:
         # Artifact name
         name: FSharp.AsyncExtra
         # Directory containing files to upload
-        path: src/FSharp.AsyncExtra/bin/Release/
+        path: src/AsyncExtra/bin/Release/
         
         
   publish:
