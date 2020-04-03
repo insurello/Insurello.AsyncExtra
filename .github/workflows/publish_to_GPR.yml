@@ -53,6 +53,6 @@ jobs:
         NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}} github
       uses: actions/setup-dotnet@v1
     - name: Publish the package to GPR
-      run: dotnet nuget push Release/*.nupkg
+      run: dotnet nuget push Release/*.nupkg --skip-duplicate --no-symbols true
 
 
