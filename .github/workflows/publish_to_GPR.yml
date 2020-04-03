@@ -43,7 +43,7 @@ jobs:
       with: 
         # Artifact name
         name: FSharp.AsyncExtra
-        path: ./Release
+        path: Release
     - uses: actions/checkout@v2
     - name: Setup .NET Core
       with:
