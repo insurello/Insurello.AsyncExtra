@@ -9,6 +9,7 @@
     <PackageDescription>AsyncResult type with helper functions</PackageDescription>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/insurello/FSharp.AsyncExtra</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
