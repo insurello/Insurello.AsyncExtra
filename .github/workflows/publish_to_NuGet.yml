@@ -2,9 +2,8 @@ name: Publish to nuget
 
 on:
   release:
-    types: 
-      - created
-      - edited
+    types: [created, edited]
+
 
 jobs:
   publish:
