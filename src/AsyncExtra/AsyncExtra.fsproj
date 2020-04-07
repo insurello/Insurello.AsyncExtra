@@ -3,9 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <PackageId>FSharp.AsyncExtra</PackageId>
-    <Version>1.0.0</Version>
-    <Authors>insurello</Authors>
-    <Company>insurello</Company>
+    <Authors>Insurello</Authors>
+    <Company>Insurello</Company>
     <PackageDescription>AsyncResult type with helper functions</PackageDescription>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/insurello/FSharp.AsyncExtra</RepositoryUrl>
