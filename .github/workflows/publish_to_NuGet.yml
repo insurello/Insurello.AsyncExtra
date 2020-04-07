@@ -14,11 +14,11 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: Build
-        run: dotnet build --configuration Release --no-restore --include-source
+        run: dotnet build --configuration Release --no-restore
       - name: Test
         run: dotnet test --no-restore --verbosity normal
       - name: Create the package
-        run: dotnet pack --configuration Release -o Release -p:PackageVersion=${GITHUB_REF/refs\/tags\/v/''}
+        run: dotnet pack --configuration Release -o Release -p:PackageVersion=${GITHUB_REF/refs\/tags\/v/''} --include-source
       - name: Publish the package to NuGet
         env:
           NUGET_AUTH_TOKEN: ${{secrets.NUGET_AUTH_TOKEN}}
