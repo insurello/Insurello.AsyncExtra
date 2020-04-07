@@ -18,10 +18,10 @@ jobs:
       - name: Test
         run: dotnet test --no-restore --verbosity normal
       - name: Create the package
-        run: dotnet pack --configuration Release
+        run: dotnet pack --configuration Release -o Release/FSharp.AsyncExtra.${GITHUB_REF/v/''}.nupkg  
       - name: Publish the package to NuGet
         env:
           NUGET_AUTH_TOKEN: ${{secrets.NUGET_AUTH_TOKEN}}
-        run: dotnet nuget push src/AsyncExtra/bin/Release/*.nupkg --skip-duplicate --no-symbols true --source https://api.nuget.org/v3/index.json -k ${NUGET_AUTH_TOKEN}
+        run: dotnet nuget push Release/FSharp.AsyncExtra.${GITHUB_REF/v/''}.nupkg --skip-duplicate --no-symbols true --source https://api.nuget.org/v3/index.json -k ${NUGET_AUTH_TOKEN}
      
   
