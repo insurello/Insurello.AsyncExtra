@@ -14,14 +14,14 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: Build
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build --configuration Release --no-restore --include-source
       - name: Test
         run: dotnet test --no-restore --verbosity normal
       - name: Create the package
-        run: dotnet pack --configuration Release -o Release/FSharp.AsyncExtra.${GITHUB_REF/v/''}.nupkg  
+        run: dotnet pack --configuration Release -o Release -p:PackageVersion=${GITHUB_REF/refs\/tags\/v/''}
       - name: Publish the package to NuGet
         env:
           NUGET_AUTH_TOKEN: ${{secrets.NUGET_AUTH_TOKEN}}
-        run: dotnet nuget push Release/FSharp.AsyncExtra.${GITHUB_REF/v/''}.nupkg --skip-duplicate --no-symbols true --source https://api.nuget.org/v3/index.json -k ${NUGET_AUTH_TOKEN}
+        run: dotnet nuget push Release/*.nupkg --skip-duplicate --no-symbols true --source https://api.nuget.org/v3/index.json -k ${NUGET_AUTH_TOKEN}
      
   
