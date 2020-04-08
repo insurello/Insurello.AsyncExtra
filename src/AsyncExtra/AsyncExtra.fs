@@ -21,6 +21,15 @@ module AsyncResult =
             | None -> Error err
             |> fromResult
 
+    let fromTask: System.Threading.Tasks.Task<'x> -> AsyncResult<'x, string> =
+        fun task ->
+            task
+            |> Async.AwaitTask
+            |> Async.Catch
+            |> Async.map (function
+                | Choice1Of2 response -> Ok response
+                | Choice2Of2 exn -> Error exn.Message)
+
     let map: ('x -> 'y) -> AsyncResult<'x, 'err> -> AsyncResult<'y, 'err> =
         fun f asyncResultX -> Async.map (Result.map f) asyncResultX
 
