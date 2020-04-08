@@ -27,6 +27,7 @@ module AsyncResultExample
 
 open AsyncExtra
 
+// SETUP EXAMPLE-FUNCTIONS
 let fetchPersonIds: unit -> Async<List<int>> =
     fun () ->
         async {
@@ -53,6 +54,7 @@ let firstId: List<int> -> Result<int, string> =
         | Some id -> Ok id
         | None -> Error "Empty list of Ids"
 
+// SETUP EXAMPLE-FUNCTIONS DONE
 
 // Without AsyncExtra
 let firstPersonsName: unit -> Async<Result<string, string>> =
