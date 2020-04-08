@@ -6,7 +6,7 @@ Library for handling Async operations that might fail. Mainly gives you the type
 
 We wanted to practice [Railway Oriented Programming](https://fsharpforfunandprofit.com/rop/) in the Async world which is tricky in F# without helper functions.
 
-A common pattern in the real world is a service needs to parse the input, call different services, do DB-lookups, conversions, store and return something. These steps can usually fail in different ways. E.g. Invalid input, external request failed etc. In F# we have the `Result` type for things that might fail and `Async` for things that are asynchronous but we usually need the combination of these two, `AsyncResult`, which is not a type that exist in F#. This makes it hard to work with and requires a lot of plumbing (see example below).
+A common pattern in the real world is that a service needs to parse input, call different services, do DB-lookups, do conversions, store and return something. These steps can usually fail in different ways. E.g. Invalid input, external request failed etc. In F# we have the `Result` type for things that might fail and `Async` for things that are asynchronous but we usually need the combination of these two, `AsyncResult`, which is not a type that exist in F#. This makes it tedious to work with and requires a lot of plumbing (see example below).
 
 ### Inspiration
 
