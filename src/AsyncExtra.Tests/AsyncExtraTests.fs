@@ -1,5 +1,6 @@
 module AsyncExtraTests
 
+open AsyncExtra
 open Expecto
 
 [<Tests>]

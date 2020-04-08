@@ -1,4 +1,4 @@
-namespace global
+namespace AsyncExtra
 
 [<RequireQualifiedAccessAttribute>]
 module Async =
