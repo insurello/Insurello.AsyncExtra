@@ -14,6 +14,13 @@ type AsyncResult<'x, 'err> = Async<Result<'x, 'err>>
 module AsyncResult =
     let fromResult: Result<'x, 'err> -> AsyncResult<'x, 'err> = Async.singleton
 
+    let fromOption: 'err -> Option<'x> -> AsyncResult<'x, 'err> =
+        fun err option ->
+            match option with
+            | Some x -> Ok x
+            | None -> Error err
+            |> fromResult
+
     let map: ('x -> 'y) -> AsyncResult<'x, 'err> -> AsyncResult<'y, 'err> =
         fun f asyncResultX -> Async.map (Result.map f) asyncResultX
 
