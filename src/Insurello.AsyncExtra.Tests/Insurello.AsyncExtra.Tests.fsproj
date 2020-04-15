@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <GenerateProgramFile>false</GenerateProgramFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
@@ -19,6 +19,6 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.*" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AsyncExtra\AsyncExtra.fsproj" />
+    <ProjectReference Include="..\Insurello.AsyncExtra\Insurello.AsyncExtra.fsproj" />
   </ItemGroup>
 </Project>

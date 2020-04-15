@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
-    <PackageId>FSharp.AsyncExtra</PackageId>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <PackageId>Insurello.AsyncExtra</PackageId>
     <Authors>Insurello</Authors>
     <Company>Insurello</Company>
     <PackageDescription>AsyncResult type with helper functions</PackageDescription>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/insurello/FSharp.AsyncExtra</RepositoryUrl>
+    <RepositoryUrl>https://github.com/insurello/Insurello.AsyncExtra</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
