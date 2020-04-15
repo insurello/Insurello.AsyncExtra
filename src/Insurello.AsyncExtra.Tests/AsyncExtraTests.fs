@@ -1,6 +1,6 @@
 module AsyncExtraTests
 
-open AsyncExtra
+open Insurello.AsyncExtra
 open Expecto
 
 [<Tests>]

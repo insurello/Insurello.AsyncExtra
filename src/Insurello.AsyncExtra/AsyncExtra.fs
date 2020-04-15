@@ -1,4 +1,4 @@
-namespace AsyncExtra
+namespace Insurello.AsyncExtra
 
 [<RequireQualifiedAccessAttribute>]
 module Async =

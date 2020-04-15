@@ -1,4 +1,4 @@
-# FSharp.AsyncExtra
+# Insurello.AsyncExtra
 
 Library for handling Async operations that might fail. Mainly gives you the type `AsyncResult` and helper functions for creating and working with this type.
 
@@ -25,7 +25,7 @@ type AsyncResult<'success, 'error> = Async<Result<'success, 'error>>
 ```fsharp
 module AsyncResultExample
 
-open AsyncExtra
+open Insurello.AsyncExtra
 
 // SETUP EXAMPLE-FUNCTIONS
 let fetchPersonIds: unit -> Async<List<int>> =

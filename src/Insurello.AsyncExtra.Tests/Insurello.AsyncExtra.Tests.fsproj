@@ -19,6 +19,6 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.*" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AsyncExtra\AsyncExtra.fsproj" />
+    <ProjectReference Include="..\Insurello.AsyncExtra\Insurello.AsyncExtra.fsproj" />
   </ItemGroup>
 </Project>
