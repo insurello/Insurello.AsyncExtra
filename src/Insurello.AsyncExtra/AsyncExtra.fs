@@ -44,10 +44,21 @@ module AsyncResult =
 
                 | Error err -> Async.singleton (Error err))
 
+    let bindError: ('errT -> AsyncResult<'x, 'errU>) -> AsyncResult<'x, 'errT> -> AsyncResult<'x, 'errU> =
+        fun f asyncResultErrT ->
+            asyncResultErrT
+            |> Async.bind (function
+                | Ok x -> Async.singleton (Ok x)
+
+                | Error err -> f err)
+
     let sequence: AsyncResult<'x, 'error> list -> AsyncResult<'x list, 'error> =
         let folder: AsyncResult<'x list, 'error> -> AsyncResult<'x, 'error> -> AsyncResult<'x list, 'error> =
             fun acc nextAsyncResult ->
-                acc |> bind (fun okValues -> nextAsyncResult |> map (fun nextOkValue -> nextOkValue :: okValues))
+                acc
+                |> bind (fun okValues ->
+                    nextAsyncResult
+                    |> map (fun nextOkValue -> nextOkValue :: okValues))
 
         fun asyncs ->
             asyncs
