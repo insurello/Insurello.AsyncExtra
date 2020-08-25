@@ -12,7 +12,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.7.2" />
     <Compile Include="AsyncExtra.fs" />
   </ItemGroup>
+  <PropertyGroup>
+    <OtherFlags>$(OtherFlags) --warnon:1182 --warnaserror:FS0025</OtherFlags>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
 
 </Project>
