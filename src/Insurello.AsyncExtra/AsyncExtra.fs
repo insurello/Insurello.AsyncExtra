@@ -60,3 +60,15 @@ module AsyncResult =
             asyncs
             |> List.fold folder (fromResult (Ok []))
             |> map List.rev
+
+    type AsyncResultBuilder() =
+        member _.Return(x) = Async.singleton (Ok x)
+        member _.ReturnFrom(m: AsyncResult<_, _>) = m
+        member _.Bind(m, f) = bind f m
+        member _.Bind((_, error), f) = bindError f error
+        member _.Zero() = Async.singleton None
+        member _.Combine(m, f) = bind f m
+        member _.Delay(f: unit -> 'T) = f
+        member _.Run(f) = f ()
+
+    let asyncResult = AsyncResultBuilder()
