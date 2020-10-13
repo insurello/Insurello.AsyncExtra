@@ -33,7 +33,8 @@ let tests =
                           j)
 
               let input =
-                  [ (dummyAsync 1)
+                  [ Async.Sleep 100
+                    |> Async.bind (fun _ -> dummyAsync 1)
                     (dummyAsync 2)
                     (dummyAsync 3) ]
 
