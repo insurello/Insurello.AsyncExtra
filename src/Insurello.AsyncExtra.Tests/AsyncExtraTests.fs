@@ -1,5 +1,7 @@
 module AsyncExtraTests
 
+open System.Threading
+open System.Threading.Tasks
 open Insurello.AsyncExtra
 open Expecto
 
@@ -38,16 +40,26 @@ let tests =
               Expect.equal orderRun expectedOkValue "Should be run in same order"
           } ]
 
-[<Tests>]]
+[<Tests>]
 let taskTests =
         testList "Task tests"
-            [ testAsync "should ... " {
-                let input = fun _ -> Async.singleton |> Async.StartAsTask
+            [ testAsync "should convert from Task<string> to AsyncResult" {
+                let input = Async.singleton "Hello" |> Async.StartAsTask
 
-                // let expectedValue = ()
+                let expectedValue = Ok "Hello"
 
-                let! actual = AsyncResult.fromTeeTask input
+                let! actual = AsyncResult.fromTask input
 
-                Expect.equal actual expectedValue
+                Expect.equal actual expectedValue "Should be equal"
+            }
+            ;testAsync "should convert from TeeTask to AsyncResult" {
+                let source = new CancellationTokenSource()
+                let input = Task.Delay(0, source.Token)
+                    
+                let expectedValue = Ok "Hello"
+
+                let! actual = AsyncResult.fromTask input
+
+                Expect.equal actual expectedValue "Should be equal"
             }]
 
