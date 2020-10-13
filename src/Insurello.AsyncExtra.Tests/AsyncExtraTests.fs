@@ -37,3 +37,17 @@ let tests =
               let! _actual = AsyncResult.sequence input
               Expect.equal orderRun expectedOkValue "Should be run in same order"
           } ]
+
+[<Tests>]]
+let taskTests =
+        testList "Task tests"
+            [ testAsync "should ... " {
+                let input = fun _ -> Async.singleton |> Async.StartAsTask
+
+                // let expectedValue = ()
+
+                let! actual = AsyncResult.fromTeeTask input
+
+                Expect.equal actual expectedValue
+            }]
+

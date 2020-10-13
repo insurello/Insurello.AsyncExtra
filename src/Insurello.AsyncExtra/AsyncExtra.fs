@@ -30,7 +30,7 @@ module AsyncResult =
                 | Choice1Of2 response -> Ok response
                 | Choice2Of2 exn -> Error exn.Message)
 
-    let fromTeeTask: System.Threading.Tasks.Task -> AsyncResult<'x, string> =
+    let fromTeeTask: System.Threading.Tasks.Task -> AsyncResult<unit, string> =
         fun task ->
             task
             |> Async.AwaitTask
@@ -56,7 +56,10 @@ module AsyncResult =
     let sequence: AsyncResult<'x, 'error> list -> AsyncResult<'x list, 'error> =
         let folder: AsyncResult<'x list, 'error> -> AsyncResult<'x, 'error> -> AsyncResult<'x list, 'error> =
             fun acc nextAsyncResult ->
-                acc |> bind (fun okValues -> nextAsyncResult |> map (fun nextOkValue -> nextOkValue :: okValues))
+                acc
+                |> bind (fun okValues ->
+                    nextAsyncResult
+                    |> map (fun nextOkValue -> nextOkValue :: okValues))
 
         fun asyncs ->
             asyncs
