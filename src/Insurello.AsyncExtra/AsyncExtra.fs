@@ -30,7 +30,7 @@ module AsyncResult =
                 | Choice1Of2 response -> Ok response
                 | Choice2Of2 exn -> Error exn.Message)
 
-    let fromTeeTask: System.Threading.Tasks.Task -> AsyncResult<unit, string> =
+    let fromUnitTask: System.Threading.Tasks.Task -> AsyncResult<unit, string> =
         fun task ->
             task
             |> Async.AwaitTask

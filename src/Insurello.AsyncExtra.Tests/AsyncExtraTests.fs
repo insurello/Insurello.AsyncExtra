@@ -7,7 +7,8 @@ open Expecto
 
 [<Tests>]
 let tests =
-    testList "Sequence tests"
+    testList
+        "Sequence tests"
         [ testAsync "should return values in same order as given tasks" {
               let dummyAsync: int -> AsyncResult<int, string> = Ok >> AsyncResult.fromResult
 
@@ -17,6 +18,7 @@ let tests =
                   [ (dummyAsync 1)
                     (dummyAsync 2)
                     (dummyAsync 3) ]
+
               let! actual = AsyncResult.sequence input
               Expect.equal actual expected "should equal"
           }
@@ -42,24 +44,50 @@ let tests =
 
 [<Tests>]
 let taskTests =
-        testList "Task tests"
-            [ testAsync "should convert from Task<string> to AsyncResult" {
-                let input = Async.singleton "Hello" |> Async.StartAsTask
+    testList
+        "Task tests"
+        [ testAsync "should convert from Task<string> to AsyncResult" {
+              let input =
+                  Async.singleton "Hello" |> Async.StartAsTask
 
-                let expectedValue = Ok "Hello"
+              let expectedValue = Ok "Hello"
 
-                let! actual = AsyncResult.fromTask input
+              let! actual = AsyncResult.fromTask input
 
-                Expect.equal actual expectedValue "Should be equal"
-            }
-            ;testAsync "should convert from TeeTask to AsyncResult" {
-                let source = new CancellationTokenSource()
-                let input = Task.Delay(0, source.Token)
-                    
-                let expectedValue = Ok "Hello"
+              Expect.equal actual expectedValue "Should be equal"
+          }
+          testAsync "fromTask failing Task should result in Error" {
 
-                let! actual = AsyncResult.fromTask input
+              let input =
+                  Async.singleton "Hello"
+                  |> Async.map (fun _ -> failwith "boom")
+                  |> Async.StartAsTask
 
-                Expect.equal actual expectedValue "Should be equal"
-            }]
+              let expectedValue =
+                  Error "One or more errors occurred. (boom)"
 
+              let! actual = AsyncResult.fromTask input
+
+              Expect.equal actual expectedValue "Should be equal"
+          }
+          testAsync "should convert from Task to AsyncResult" {
+              let source = new CancellationTokenSource()
+              let input: Task = Task.Delay(0, source.Token)
+
+              let expectedValue = Ok()
+
+              let! actual = AsyncResult.fromUnitTask input
+
+              Expect.equal actual expectedValue "Should be equal"
+          }
+          testAsync "failing Task should result in Error" {
+              let source = new CancellationTokenSource()
+              let input: Task = Task.Delay(1000, source.Token)
+              let expectedValue = Error "A task was canceled."
+
+              source.Cancel()
+
+              let! actual = AsyncResult.fromUnitTask input
+
+              Expect.equal actual expectedValue "Should be equal"
+          } ]
