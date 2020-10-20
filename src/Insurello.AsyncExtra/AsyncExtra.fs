@@ -66,8 +66,6 @@ module AsyncResult =
         member _.ReturnFrom(m: AsyncResult<_, _>) = m
         member _.Bind(m, f) = bind f m
         member _.Bind((_, error), f) = bindError f error
-        member _.Zero() = Async.singleton (Ok ())
-        member _.Combine(m, f) = bind f m
         member _.Delay(f: unit -> 'T) = f
         member _.Run(f) = f ()
 
