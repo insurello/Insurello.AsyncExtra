@@ -66,7 +66,7 @@ module AsyncResult =
         member _.ReturnFrom(m: AsyncResult<_, _>) = m
         member _.Bind(m, f) = bind f m
         member _.Bind((_, error), f) = bindError f error
-        member _.Delay(f: unit -> 'T) = f
+        member _.Delay(f: unit -> AsyncResult<_, _>) = async.Delay(f)
         member _.Run(f) = f ()
 
     let asyncResult = AsyncResultBuilder()
