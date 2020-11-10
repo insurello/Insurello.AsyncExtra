@@ -21,19 +21,17 @@ module AsyncResult =
             | None -> Error err
             |> fromResult
 
-    let fromTask: System.Threading.Tasks.Task<'x> -> AsyncResult<'x, string> =
-        fun task ->
-            task
-            |> Async.AwaitTask
+    let fromTask: (unit -> System.Threading.Tasks.Task<'x>) -> AsyncResult<'x, string> =
+        fun lazyTask ->
+            async.Delay(lazyTask >> Async.AwaitTask)
             |> Async.Catch
             |> Async.map (function
                 | Choice1Of2 response -> Ok response
                 | Choice2Of2 exn -> Error exn.Message)
 
-    let fromUnitTask: System.Threading.Tasks.Task -> AsyncResult<unit, string> =
-        fun task ->
-            task
-            |> Async.AwaitTask
+    let fromUnitTask: (unit -> System.Threading.Tasks.Task) -> AsyncResult<unit, string> =
+        fun lazyTask ->
+            async.Delay(lazyTask >> Async.AwaitTask)
             |> Async.Catch
             |> Async.map (function
                 | Choice1Of2 response -> Ok response

@@ -51,7 +51,7 @@ let taskTests =
             "fromUnitTask"
               [ testAsync "should convert from Task to AsyncResult" {
                     let source = new CancellationTokenSource()
-                    let input: Task = Task.Delay(0, source.Token)
+                    let input: (unit -> Task) = fun () -> Task.Delay(0, source.Token)
 
                     let expectedValue = Ok()
 
@@ -61,7 +61,7 @@ let taskTests =
                 }
                 testAsync "failing Task should result in Error" {
                     let source = new CancellationTokenSource()
-                    let input: Task = Task.Delay(1000, source.Token)
+                    let input = fun () -> Task.Delay(1000, source.Token)
                     let expectedValue = Error "A task was canceled."
 
                     source.Cancel()
@@ -74,7 +74,7 @@ let taskTests =
               "fromTask"
               [ testAsync "should convert from Task<string> to AsyncResult" {
                     let input =
-                        Async.singleton "Hello" |> Async.StartAsTask
+                        fun () -> Async.singleton "Hello" |> Async.StartAsTask
 
                     let expectedValue = Ok "Hello"
 
@@ -85,9 +85,10 @@ let taskTests =
                 testAsync "fromTask failing Task should result in Error" {
 
                     let input =
-                        Async.singleton "Hello"
-                        |> Async.map (fun _ -> failwith "boom")
-                        |> Async.StartAsTask
+                        fun () ->
+                            Async.singleton "Hello"
+                            |> Async.map (fun _ -> failwith "boom")
+                            |> Async.StartAsTask
 
                     let expectedValue =
                         Error "One or more errors occurred. (boom)"
