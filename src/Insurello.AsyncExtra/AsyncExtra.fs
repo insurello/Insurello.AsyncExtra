@@ -12,6 +12,8 @@ type AsyncResult<'x, 'err> = Async<Result<'x, 'err>>
 
 [<RequireQualifiedAccessAttribute>]
 module AsyncResult =
+    let singleton: 'x -> AsyncResult<'x, 'err> = fun x -> Async.singleton (Ok x)
+
     let fromResult: Result<'x, 'err> -> AsyncResult<'x, 'err> = Async.singleton
 
     let fromOption: 'err -> Option<'x> -> AsyncResult<'x, 'err> =
@@ -43,6 +45,23 @@ module AsyncResult =
     let mapError: ('errX -> 'errY) -> AsyncResult<'x, 'errX> -> AsyncResult<'x, 'errY> =
         fun f asyncResultX -> Async.map (Result.mapError f) asyncResultX
 
+    let andMap: AsyncResult<'x, 'err> -> AsyncResult<('x -> 'y), 'err> -> AsyncResult<'y, 'err> =
+        fun m f ->
+            async {
+                let! exec1 = Async.StartChild f
+
+                let! exec2 = Async.StartChild m
+
+                let! x1 = exec1
+
+                let! x2 = exec2
+
+                return match x1, x2 with
+                       | Ok ok1, Ok ok2 -> Ok(ok1 ok2)
+                       | Error e, _ -> Error e
+                       | _, Error e -> Error e
+            }
+
     let bind: ('x -> AsyncResult<'y, 'err>) -> AsyncResult<'x, 'err> -> AsyncResult<'y, 'err> =
         fun successMapper ->
             Async.bind (function
@@ -67,3 +86,27 @@ module AsyncResult =
             asyncs
             |> List.fold folder (fromResult (Ok []))
             |> map List.rev
+
+    type AsyncResultBuilder() =
+        member _.Return(x) = singleton x
+
+        member _.ReturnFrom(m: AsyncResult<_, _>) = m
+
+        member _.Bind(m, f) = bind f m
+
+        member _.Bind((_, error), f) = bindError f error
+
+        member _.Zero() = singleton ()
+        
+        member _.Combine(m1: AsyncResult<unit, 'err>, m2: AsyncResult<'x, 'err>) =
+            bind (fun () -> m2) m1
+        
+        member _.MergeSources(m1: AsyncResult<'a, 'e>, m2: AsyncResult<'b, 'e>) =
+            fun m1 m2 -> m1, m2
+            |> singleton
+            |> andMap m1
+            |> andMap m2
+
+        member _.Delay(generator: unit -> AsyncResult<_, _>) = async.Delay generator
+
+    let asyncResult = AsyncResultBuilder()
