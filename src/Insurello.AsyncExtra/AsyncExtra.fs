@@ -1,6 +1,6 @@
 namespace Insurello.AsyncExtra
 
-[<RequireQualifiedAccessAttribute>]
+[<RequireQualifiedAccess>]
 module Async =
     let singleton: 'value -> Async<'value> = async.Return
 
@@ -10,7 +10,7 @@ module Async =
 
 type AsyncResult<'x, 'err> = Async<Result<'x, 'err>>
 
-[<RequireQualifiedAccessAttribute>]
+[<RequireQualifiedAccess>]
 module AsyncResult =
     let fromResult: Result<'x, 'err> -> AsyncResult<'x, 'err> = Async.singleton
 
