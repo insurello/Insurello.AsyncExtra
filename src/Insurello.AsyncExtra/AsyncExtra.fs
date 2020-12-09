@@ -12,6 +12,16 @@ type AsyncResult<'x, 'err> = Async<Result<'x, 'err>>
 
 [<RequireQualifiedAccess>]
 module AsyncResult =
+    let singleton: 'value -> AsyncResult<'value, 'e> = fun x -> Async.singleton (Ok x)
+
+    let fromAsync: Async<'x> -> AsyncResult<'x, string> =
+        fun async ->
+            async
+            |> Async.Catch
+            |> Async.map (function
+                | Choice1Of2 response -> Ok response
+                | Choice2Of2 exn -> Error exn.Message)
+
     let fromResult: Result<'x, 'err> -> AsyncResult<'x, 'err> = Async.singleton
 
     let fromOption: 'err -> Option<'x> -> AsyncResult<'x, 'err> =
@@ -43,41 +53,6 @@ module AsyncResult =
     let mapError: ('errX -> 'errY) -> AsyncResult<'x, 'errX> -> AsyncResult<'x, 'errY> =
         fun f asyncResultX -> Async.map (Result.mapError f) asyncResultX
 
-    let bind: ('x -> AsyncResult<'y, 'err>) -> AsyncResult<'x, 'err> -> AsyncResult<'y, 'err> =
-        fun successMapper ->
-            Async.bind (function
-                | Ok x -> successMapper x
-                | Error err -> Async.singleton (Error err))
-
-    let bindError: ('errT -> AsyncResult<'x, 'errU>) -> AsyncResult<'x, 'errT> -> AsyncResult<'x, 'errU> =
-        fun errorMapper ->
-            Async.bind (function
-                | Ok x -> Async.singleton (Ok x)
-                | Error err -> errorMapper err)
-
-    let sequence: AsyncResult<'x, 'error> list -> AsyncResult<'x list, 'error> =
-        let folder: AsyncResult<'x list, 'error> -> AsyncResult<'x, 'error> -> AsyncResult<'x list, 'error> =
-            fun acc nextAsyncResult ->
-                acc
-                |> bind (fun okValues ->
-                    nextAsyncResult
-                    |> map (fun nextOkValue -> nextOkValue :: okValues))
-
-        fun asyncs ->
-            asyncs
-            |> List.fold folder (fromResult (Ok []))
-            |> map List.rev
-
-    let singleton: 'value -> AsyncResult<'value, 'e> = fun x -> Async.singleton (Ok x)
-
-    let fromAsync: Async<'x> -> AsyncResult<'x, string> =
-        fun async ->
-            async
-            |> Async.Catch
-            |> Async.map (function
-                | Choice1Of2 response -> Ok response
-                | Choice2Of2 exn -> Error exn.Message)
-
     let andMap: AsyncResult<'a, 'e> -> AsyncResult<('a -> 'b), 'e> -> AsyncResult<'b, 'e> =
         fun asyncResult f ->
             async {
@@ -94,6 +69,28 @@ module AsyncResult =
                        | Error e, _ -> Error e
                        | _, Error e -> Error e
             }
+
+    let bind: ('x -> AsyncResult<'y, 'err>) -> AsyncResult<'x, 'err> -> AsyncResult<'y, 'err> =
+        fun successMapper ->
+            Async.bind (function
+                | Ok x -> successMapper x
+                | Error err -> Async.singleton (Error err))
+
+    let bindError: ('errT -> AsyncResult<'x, 'errU>) -> AsyncResult<'x, 'errT> -> AsyncResult<'x, 'errU> =
+        fun errorMapper ->
+            Async.bind (function
+                | Ok x -> Async.singleton (Ok x)
+                | Error err -> errorMapper err)
+
+    let sequence: AsyncResult<'x, 'error> list -> AsyncResult<'x list, 'error> =
+        let folder: AsyncResult<'x, 'error> -> AsyncResult<'x list, 'error> -> AsyncResult<'x list, 'error> =
+            fun asyncResult1 asyncResult2 ->
+                (fun head tail -> head :: tail)
+                |> singleton
+                |> andMap asyncResult1
+                |> andMap asyncResult2
+
+        fun asyncs -> List.foldBack folder asyncs (singleton [])
 
     let zip: AsyncResult<'a, 'e> -> AsyncResult<'b, 'e> -> AsyncResult<('a * 'b), 'e> =
         fun async1 async2 ->
