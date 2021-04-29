@@ -608,4 +608,91 @@ let bindTests =
 
                     Expect.equal actual expected "Should be equal"
 
+                } ]
+
+          testList
+              "bind4"
+              [ testAsync "should map over the value from four AsyncResult" {
+                  let input1 = toAsyncResult 3
+                  let input2 = toAsyncResult 7
+                  let input3 = toAsyncResult 32
+                  let input4 = toAsyncResult 10
+                  let f a b c d = toAsyncResult (a + b + c + d)
+
+                  let expectedValue = Ok 52
+
+                  let! actual = AsyncResult.bind4 f input1 input2 input3 input4
+
+                  Expect.equal actual expectedValue "Should be equal"
+                }
+
+                testAsync "should fail if the first AsyncResult is an error" {
+                    let input1 = AsyncResult.fromResult (Error "Not Ok")
+                    let input2 = toAsyncResult 3
+                    let input3 = toAsyncResult 32
+                    let input4 = toAsyncResult 10
+                    let f a b c d = toAsyncResult (a + b + c + d)
+
+                    let expectedValue = Error "Not Ok"
+
+                    let! actual = AsyncResult.bind4 f input1 input2 input3 input4
+
+                    Expect.equal actual expectedValue "Should be equal"
+                }
+
+                testAsync "should fail if the second AsyncResult is an error" {
+                    let input1 = toAsyncResult 3
+                    let input2 = AsyncResult.fromResult (Error "Not Ok")
+                    let input3 = toAsyncResult 4
+                    let input4 = toAsyncResult 10
+                    let f a b c d = toAsyncResult (a + b + c + d)
+
+                    let expectedValue = Error "Not Ok"
+
+                    let! actual = AsyncResult.bind4 f input1 input2 input3 input4
+
+                    Expect.equal actual expectedValue "Should be equal"
+                }
+
+                testAsync "should fail if the third AsyncResult is an error" {
+                    let input1 = toAsyncResult 3
+                    let input2 = toAsyncResult 4
+                    let input3 = AsyncResult.fromResult (Error "Not Ok")
+                    let input4 = toAsyncResult 10
+                    let f a b c d = toAsyncResult (a + b + c + d)
+
+                    let expectedValue = Error "Not Ok"
+
+                    let! actual = AsyncResult.bind4 f input1 input2 input3 input4
+
+                    Expect.equal actual expectedValue "Should be equal"
+                }
+
+                testAsync "should fail if the fourth AsyncResult is an error" {
+                    let input1 = toAsyncResult 3
+                    let input2 = toAsyncResult 4
+                    let input3 = toAsyncResult 10
+                    let input4 = AsyncResult.fromResult (Error "Not Ok")
+                    let f a b c d = toAsyncResult (a + b + c + d)
+
+                    let expectedValue = Error "Not Ok"
+
+                    let! actual = AsyncResult.bind4 f input1 input2 input3 input4
+
+                    Expect.equal actual expectedValue "Should be equal"
+                }
+
+                testAsync "should pass arguments in order" {
+                    let input1 = toAsyncResult 3
+                    let input2 = toAsyncResult 7
+                    let input3 = toAsyncResult 99
+                    let input4 = toAsyncResult 15
+
+                    let expected = Ok(3, 7, 99, 15)
+
+                    let! actual =
+                        AsyncResult.bind4 (fun a b c d -> toAsyncResult (a, b, c, d)) input1 input2 input3 input4
+
+                    Expect.equal actual expected "Should be equal"
+
                 } ] ]

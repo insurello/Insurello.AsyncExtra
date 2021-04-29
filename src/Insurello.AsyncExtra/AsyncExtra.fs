@@ -107,3 +107,6 @@ module AsyncResult =
 
     let bind3 : ('a -> 'b -> 'c -> AsyncResult<'d, 'err>) -> AsyncResult<'a, 'err> -> AsyncResult<'b, 'err> -> AsyncResult<'c, 'err> -> AsyncResult<'d, 'err> =
         fun f a1 a2 a3 -> map3 f a1 a2 a3 |> bind id
+
+    let bind4 : ('a -> 'b -> 'c -> 'd -> AsyncResult<'e, 'err>) -> AsyncResult<'a, 'err> -> AsyncResult<'b, 'err> -> AsyncResult<'c, 'err> -> AsyncResult<'d, 'err> -> AsyncResult<'e, 'err> =
+        fun f a1 a2 a3 a4 -> map4 f a1 a2 a3 a4 |> bind id
