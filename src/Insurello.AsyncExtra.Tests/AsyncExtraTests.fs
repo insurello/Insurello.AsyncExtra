@@ -253,7 +253,7 @@ let mapTests =
                     Expect.equal actual expectedValue "Should be equal"
                 }
 
-                testAsync "should pass arguemnts in order" {
+                testAsync "should pass arguments in order" {
                     let input1 = toAsyncResult 3
                     let input2 = toAsyncResult 7
 
@@ -317,7 +317,7 @@ let mapTests =
 
                     Expect.equal actual expectedValue "Should be equal"
                 }
-                testAsync "should pass arguemnts in order" {
+                testAsync "should pass arguments in order" {
                     let input1 = toAsyncResult 3
                     let input2 = toAsyncResult 7
                     let input3 = toAsyncResult 12
@@ -401,7 +401,7 @@ let mapTests =
 
                     Expect.equal actual expectedValue "Should be equal"
                 }
-                testAsync "should pass arguemnts in order" {
+                testAsync "should pass arguments in order" {
                     let input1 = toAsyncResult 3
                     let input2 = toAsyncResult 7
                     let input3 = toAsyncResult 12
