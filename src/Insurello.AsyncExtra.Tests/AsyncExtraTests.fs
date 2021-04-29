@@ -194,7 +194,7 @@ let applyTest =
 [<Tests>]
 let mapTests =
     testList
-        "Test mapping functions"
+        "Test map functions"
         [ testList
             "map"
             [ testAsync "should change the value in an AsyncResult" {
@@ -461,4 +461,34 @@ let mapTests =
                         |> AsyncResult.andMap zA
 
                     Expect.equal actual expected "Should be equal"
+                } ] ]
+
+[<Tests>]
+let bindTests =
+    testList
+        "Test bind functions"
+        [ testList
+              "bind"
+              [ testAsync "should change the value in an AsyncResult" {
+                  let input = toAsyncResult 3
+
+                  let f = ((+) 1 >> toAsyncResult)
+
+                  let expectedValue = Ok 4
+
+                  let! actual = AsyncResult.bind f input
+
+                  Expect.equal actual expectedValue "Should be equal"
+                }
+
+                testAsync "should NOT change the value in an Error AsyncResult" {
+                    let input = AsyncResult.fromResult (Error 3)
+
+                    let f = (+) 1 >> Ok >> AsyncResult.fromResult
+
+                    let expectedValue = Error 3
+
+                    let! actual = AsyncResult.bind f input
+
+                    Expect.equal actual expectedValue "Should be equal"
                 } ] ]
