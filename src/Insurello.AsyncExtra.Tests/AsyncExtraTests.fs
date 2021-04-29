@@ -468,27 +468,77 @@ let bindTests =
     testList
         "Test bind functions"
         [ testList
-              "bind"
-              [ testAsync "should change the value in an AsyncResult" {
-                  let input = toAsyncResult 3
+            "bind"
+            [ testAsync "should change the value in an AsyncResult" {
+                let input = toAsyncResult 3
 
-                  let f = ((+) 1 >> toAsyncResult)
+                let f = ((+) 1 >> toAsyncResult)
 
-                  let expectedValue = Ok 4
+                let expectedValue = Ok 4
+
+                let! actual = AsyncResult.bind f input
+
+                Expect.equal actual expectedValue "Should be equal"
+              }
+
+              testAsync "should NOT change the value in an Error AsyncResult" {
+                  let input = AsyncResult.fromResult (Error 3)
+
+                  let f = (+) 1 >> Ok >> AsyncResult.fromResult
+
+                  let expectedValue = Error 3
 
                   let! actual = AsyncResult.bind f input
 
                   Expect.equal actual expectedValue "Should be equal"
+              } ]
+
+          testList
+              "bind2"
+              [ testAsync "should map over the value from two AsyncResult" {
+                  let input1 = toAsyncResult 3
+                  let input2 = toAsyncResult 7
+                  let f a b = toAsyncResult (a + b)
+
+                  let expectedValue = Ok 10
+
+                  let! actual = AsyncResult.bind2 f input1 input2
+
+                  Expect.equal actual expectedValue "Should be equal"
                 }
 
-                testAsync "should NOT change the value in an Error AsyncResult" {
-                    let input = AsyncResult.fromResult (Error 3)
+                testAsync "should fail if the first AsyncResult is an error" {
+                    let input1 = AsyncResult.fromResult (Error "Not Ok")
+                    let input2 = toAsyncResult 3
+                    let f a b = toAsyncResult (a + b)
 
-                    let f = (+) 1 >> Ok >> AsyncResult.fromResult
+                    let expectedValue = Error "Not Ok"
 
-                    let expectedValue = Error 3
-
-                    let! actual = AsyncResult.bind f input
+                    let! actual = AsyncResult.bind2 f input1 input2
 
                     Expect.equal actual expectedValue "Should be equal"
+                }
+
+                testAsync "should fail if the second AsyncResult is an error" {
+                    let input1 = toAsyncResult 3
+                    let input2 = AsyncResult.fromResult (Error "Not Ok")
+                    let f a b = toAsyncResult (a + b)
+
+                    let expectedValue = Error "Not Ok"
+
+                    let! actual = AsyncResult.bind2 f input1 input2
+
+                    Expect.equal actual expectedValue "Should be equal"
+                }
+
+                testAsync "should pass arguments in order" {
+                    let input1 = toAsyncResult 3
+                    let input2 = toAsyncResult 7
+
+                    let expected = Ok(3, 7)
+
+                    let! actual = AsyncResult.bind2 (fun a b -> toAsyncResult (a, b)) input1 input2
+
+                    Expect.equal actual expected "Should be equal"
+
                 } ] ]

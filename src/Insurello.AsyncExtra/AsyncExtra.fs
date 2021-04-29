@@ -101,3 +101,6 @@ module AsyncResult =
 
     let andMap : AsyncResult<'a, 'err> -> AsyncResult<('a -> 'b), 'err> -> AsyncResult<'b, 'err> =
         fun a1 a2 -> apply a2 a1
+
+    let bind2 : ('a -> 'b -> AsyncResult<'c, 'err>) -> AsyncResult<'a, 'err> -> AsyncResult<'b, 'err> -> AsyncResult<'c, 'err> =
+        fun f a1 a2 -> map2 f a1 a2 |> bind id
