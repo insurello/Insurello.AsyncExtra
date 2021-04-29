@@ -695,4 +695,21 @@ let bindTests =
 
                     Expect.equal actual expected "Should be equal"
 
+                } ]
+
+          testList
+              "bind5"
+              [ testAsync "should map over the value from five AsyncResult" {
+                    let input1 = toAsyncResult 3
+                    let input2 = toAsyncResult 7
+                    let input3 = toAsyncResult 32
+                    let input4 = toAsyncResult 10
+                    let input5 = toAsyncResult 115
+                    let f a b c d e = toAsyncResult (a + b + c + d + e)
+
+                    let expectedValue = Ok 167
+
+                    let! actual = AsyncResult.bind5 f input1 input2 input3 input4 input5
+
+                    Expect.equal actual expectedValue "Should be equal"
                 } ] ]
