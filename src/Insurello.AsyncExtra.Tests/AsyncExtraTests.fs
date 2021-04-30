@@ -7,54 +7,27 @@ open Expecto
 
 [<Tests>]
 let creationTests =
+    let testSingleton text value =
+        testAsync text {
+            let! actual = AsyncResult.singleton value
+            let expected = Ok value
+
+            Expect.equal actual expected "should equal"
+        }
+
     testList
         "Test creating new AsyncResult"
         [ testList
               "singleton"
-              [ testAsync "should create an Ok AsyncResult given a string" {
-                  let value = "test"
+              [ testSingleton "should create an Ok AsyncResult given a string" "test"
 
-                  let! actual = AsyncResult.singleton value
-                  let expected = Ok value
+                testSingleton "should create an Ok AsyncResult given an int" 4
 
-                  Expect.equal actual expected "should equal"
-                }
+                testSingleton "should create an Ok AsyncResult given a bool" true
 
-                testAsync "should create an Ok AsyncResult given an int" {
-                    let value = 4
+                testSingleton "should nest Ok in a Ok AsyncResult" (Ok 1)
 
-                    let! actual = AsyncResult.singleton value
-                    let expected = Ok value
-
-                    Expect.equal actual expected "should equal"
-                }
-
-                testAsync "should create an Ok AsyncResult given a bool" {
-                    let value = true
-
-                    let! actual = AsyncResult.singleton value
-                    let expected = Ok value
-
-                    Expect.equal actual expected "should equal"
-                }
-
-                testAsync "should nest Ok in a Ok AsyncResult" {
-                    let value = Ok 1
-
-                    let! actual = AsyncResult.singleton value
-                    let expected = Ok value
-
-                    Expect.equal actual expected "should equal"
-                }
-
-                testAsync "should nest Error in a Ok AsyncResult" {
-                    let value = Error "This is in an Ok"
-
-                    let! actual = AsyncResult.singleton value
-                    let expected = Ok value
-
-                    Expect.equal actual expected "should equal"
-                } ] ]
+                testSingleton "should nest Error in a Ok AsyncResult" (Error "This is in an Ok") ] ]
 
 [<Tests>]
 let sequenceTests =
