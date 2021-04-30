@@ -154,7 +154,7 @@ Similar to `map` but will instead apply the transformation function to the `Erro
 bind : ('a -> AsyncResult<'b, 'err>) -> AsyncResult<'a, 'err> -> AsyncResult<'b, 'err>
 ```
 
-Sometimes you want to use a transform function that will return an `AsyncResult` but you don't want to end up with a nested `AsyncResult<AsyncResult<'b, 'err>, 'err>`. This is where `bind` shines. It will transform the value, in the same way as `map`, but will flatten the returning `AsyncResult` and will return an `AsyncResult<'b, 'err>`. `Bind` is also known as `andThen` in Elm and `chain` in JavaScript.
+Sometimes you want to use a transform function that will return an `AsyncResult` but you don't want to end up with a nested `AsyncResult<AsyncResult<'b, 'err>, 'err>`. This is where `bind` shines. It will transform the value, in the same way as `map`, but will flatten the returning `AsyncResult` and will return an `AsyncResult<'b, 'err>`. `bind` is also known as `andThen` in Elm and `chain` in JavaScript.
 
 ```fsharp
 fetchUser : int -> AsyncResult<User, string>
@@ -247,7 +247,7 @@ let zA = AsyncResult.singleton 30
 add3 // Async<Ok (fun a b c -> a + b + c)>
 |> AsyncResult.andMap xA // Async<Ok (fun b c -> 10 + b + c)>
 |> AsyncResult.andMap yA // Async<Ok (fun c -> 10 + 20 + c)>
-|> AsyncResult.andMap zA // Async<OK 60>
+|> AsyncResult.andMap zA // Async<Ok 60>
 ```
 
 ##### bind2
@@ -296,8 +296,8 @@ From time to time you will find yourself having a list of `AsyncResult` (`List<A
 fetchUser : int -> AsyncResult<User, string>
 
 userIds // [1; 2; 3]
-|> List.map fetchUser // [Async<Ok User>, Async<Ok User>, Async<Ok User>]
-|> AsyncResult.sequence // Async<Ok [User, User, User]>
+|> List.map fetchUser // [Async<Ok User>; Async<Ok User>; Async<Ok User>]
+|> AsyncResult.sequence // Async<Ok [User; User; User]>
 ```
 
 ##### traverse
@@ -312,13 +312,10 @@ By sending in `id` as the transform function you have implemented `sequence`. Le
 
 ```fsharp
 fetchUser : int -> AsyncResult<User, string>
+
 let userIds = [1; 2; 3]
 
-AsyncResult.traverse fetchUser userIds// Async<Ok [User, User, User]>
+AsyncResult.traverse fetchUser userIds // Async<Ok [User; User; User]>
 ```
 
 [![Insurello](https://gitcdn.xyz/repo/insurello/elm-swedish-bank-account-number/master/insurello.svg)](https://jobb.insurello.se/departments/product-tech)
-
-```
-
-```
