@@ -175,14 +175,43 @@ let taskTests =
 let applyTest =
     testList
         "Test apply"
-        [ testAsync "should follow the law of Identity (apply id v = v)" {
-            let v = AsyncResult.fromResult (Ok 42)
-            let f = AsyncResult.fromResult (Ok id)
+        [
 
-            let! actual = AsyncResult.apply f v
-            let! expectedValue = v
+          testAsync "should apply the value to function" {
+              let xA = AsyncResult.singleton 42
+              let fA = AsyncResult.singleton ((+) 10)
 
-            Expect.equal actual expectedValue "Should be equal"
+              let! actual = AsyncResult.apply fA xA
+
+              let expectedValue = Ok 52
+
+              Expect.equal actual expectedValue "Should be equal"
+          }
+
+          testAsync "should apply the value to all functions" {
+              let xA = AsyncResult.singleton 42
+              let fA1 = AsyncResult.singleton ((+) 10)
+              let fA2 = AsyncResult.singleton (fun x -> x / 2)
+
+              let! actual =
+                  xA
+                  |> AsyncResult.apply fA1
+                  |> AsyncResult.apply fA2
+                  |> AsyncResult.apply fA2
+
+              let expectedValue = Ok 13
+
+              Expect.equal actual expectedValue "Should be equal"
+          }
+
+          testAsync "should follow the law of Identity (apply id v = v)" {
+              let v = AsyncResult.singleton 42
+              let f = AsyncResult.singleton id
+
+              let! actual = AsyncResult.apply f v
+              let! expectedValue = v
+
+              Expect.equal actual expectedValue "Should be equal"
           }
           testAsync "should follow the law of Homomorphism (apply fA xA = AR.of (f x)" {
               let x = 42
@@ -209,7 +238,53 @@ let applyTest =
               let! expectedValue = AsyncResult.apply fA1 (AsyncResult.apply fA2 xA)
 
               Expect.equal actual expectedValue "Should be equal"
-          } ]
+          }
+          testAsync "should wrap the Error value and result in an Error" {
+              let fA1 = AsyncResult.singleton ((+) 10)
+              let fA2 = AsyncResult.fromResult (Error 2)
+              let xA = AsyncResult.singleton 42
+
+              let! actual =
+                  xA
+                  |> AsyncResult.apply fA2
+                  |> AsyncResult.apply fA1
+
+              let expectedValue = Error 2
+
+              Expect.equal actual expectedValue "Should be equal"
+          }
+
+          testAsync "should wrap the first Error value and result in an Error" {
+              let fA1 = AsyncResult.fromResult (Error 1)
+              let fA2 = AsyncResult.fromResult (Error 2)
+              let xA = AsyncResult.singleton 42
+
+              let! actual =
+                  xA
+                  |> AsyncResult.apply fA2
+                  |> AsyncResult.apply fA1
+
+              let expectedValue = Error 1
+
+              Expect.equal actual expectedValue "Should be equal"
+          }
+
+          testAsync "should result in an Error if the value is an Error" {
+              let fA1 = AsyncResult.singleton ((+) 10)
+              let fA2 = AsyncResult.singleton ((-) 2)
+              let xA = AsyncResult.fromResult (Error 42)
+
+              let! actual =
+                  xA
+                  |> AsyncResult.apply fA2
+                  |> AsyncResult.apply fA1
+
+              let expectedValue = Error 42
+
+              Expect.equal actual expectedValue "Should be equal"
+          }
+
+          ]
 
 [<Tests>]
 let mapTests =
