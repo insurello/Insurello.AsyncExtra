@@ -12,18 +12,18 @@ type AsyncResult<'x, 'err> = Async<Result<'x, 'err>>
 
 [<RequireQualifiedAccessAttribute>]
 module AsyncResult =
-    let fromResult : Result<'x, 'err> -> AsyncResult<'x, 'err> = Async.singleton
+    let fromResult : Result<'a, 'err> -> AsyncResult<'a, 'err> = Async.singleton
 
-    let singleton : 'x -> AsyncResult<'x, 'err> = fun x -> fromResult (Ok x)
+    let singleton : 'a -> AsyncResult<'a, 'err> = fun x -> fromResult (Ok x)
 
-    let fromOption : 'err -> Option<'x> -> AsyncResult<'x, 'err> =
+    let fromOption : 'err -> Option<'a> -> AsyncResult<'a, 'err> =
         fun err option ->
             match option with
             | Some x -> Ok x
             | None -> Error err
             |> fromResult
 
-    let fromTask : (unit -> System.Threading.Tasks.Task<'x>) -> AsyncResult<'x, string> =
+    let fromTask : (unit -> System.Threading.Tasks.Task<'a>) -> AsyncResult<'a, string> =
         fun lazyTask ->
             async.Delay(lazyTask >> Async.AwaitTask)
             |> Async.Catch
@@ -41,20 +41,20 @@ module AsyncResult =
                 | Choice1Of2 response -> Ok response
                 | Choice2Of2 exn -> Error exn.Message)
 
-    let map : ('x -> 'y) -> AsyncResult<'x, 'err> -> AsyncResult<'y, 'err> =
+    let map : ('a -> 'b) -> AsyncResult<'a, 'err> -> AsyncResult<'b, 'err> =
         fun f asyncResultX -> Async.map (Result.map f) asyncResultX
 
-    let mapError : ('errX -> 'errY) -> AsyncResult<'x, 'errX> -> AsyncResult<'x, 'errY> =
+    let mapError : ('errX -> 'errY) -> AsyncResult<'a, 'errX> -> AsyncResult<'a, 'errY> =
         fun f asyncResultX -> Async.map (Result.mapError f) asyncResultX
 
-    let bind : ('x -> AsyncResult<'y, 'err>) -> AsyncResult<'x, 'err> -> AsyncResult<'y, 'err> =
+    let bind : ('a -> AsyncResult<'b, 'err>) -> AsyncResult<'a, 'err> -> AsyncResult<'b, 'err> =
         fun successMapper ->
             Async.bind
                 (function
                 | Ok x -> successMapper x
                 | Error err -> Async.singleton (Error err))
 
-    let bindError : ('errT -> AsyncResult<'x, 'errU>) -> AsyncResult<'x, 'errT> -> AsyncResult<'x, 'errU> =
+    let bindError : ('errX -> AsyncResult<'a, 'errY>) -> AsyncResult<'a, 'errX> -> AsyncResult<'a, 'errY> =
         fun errorMapper ->
             Async.bind
                 (function
@@ -84,7 +84,7 @@ module AsyncResult =
 
             List.foldBack mapConcat list (singleton [])
 
-    let sequence : AsyncResult<'x, 'error> list -> AsyncResult<'x list, 'error> = fun list -> traverse id list
+    let sequence : List<AsyncResult<'a, 'error>> -> AsyncResult<'a list, 'error> = fun list -> traverse id list
 
     let private (<!>) = map
     let private (<*>) = apply
