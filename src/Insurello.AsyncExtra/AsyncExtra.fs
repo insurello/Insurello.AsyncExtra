@@ -14,6 +14,8 @@ type AsyncResult<'x, 'err> = Async<Result<'x, 'err>>
 module AsyncResult =
     let fromResult : Result<'x, 'err> -> AsyncResult<'x, 'err> = Async.singleton
 
+    let singleton : 'x -> AsyncResult<'x, 'err> = fun x -> fromResult (Ok x)
+
     let fromOption : 'err -> Option<'x> -> AsyncResult<'x, 'err> =
         fun err option ->
             match option with
@@ -80,7 +82,7 @@ module AsyncResult =
             let mapConcat headR tailR =
                 apply (map (transformer >> cons) headR) tailR
 
-            List.foldBack mapConcat list (fromResult (Ok []))
+            List.foldBack mapConcat list (singleton [])
 
     let sequence : AsyncResult<'x, 'error> list -> AsyncResult<'x list, 'error> = fun list -> traverse id list
 
@@ -113,3 +115,6 @@ module AsyncResult =
 
     let bind5 : ('a -> 'b -> 'c -> 'd -> 'e -> AsyncResult<'f, 'err>) -> AsyncResult<'a, 'err> -> AsyncResult<'b, 'err> -> AsyncResult<'c, 'err> -> AsyncResult<'d, 'err> -> AsyncResult<'e, 'err> -> AsyncResult<'f, 'err> =
         fun f a1 a2 a3 a4 a5 -> map5 f a1 a2 a3 a4 a5 |> bind id
+
+    let andBind : AsyncResult<'a, 'err> -> AsyncResult<('a -> AsyncResult<'b, 'err>), 'err> -> AsyncResult<'b, 'err> =
+        fun a1 a2 -> andMap a1 a2 |> bind id

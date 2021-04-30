@@ -5,7 +5,56 @@ open System.Threading.Tasks
 open Insurello.AsyncExtra
 open Expecto
 
-let toAsyncResult<'x> : 'x -> AsyncResult<'x, string> = Ok >> AsyncResult.fromResult
+[<Tests>]
+let creationTests =
+    testList
+        "Test creating new AsyncResult"
+        [ testList
+              "singleton"
+              [ testAsync "should create an Ok AsyncResult given a string" {
+                  let value = "test"
+
+                  let! actual = AsyncResult.singleton value
+                  let expected = Ok value
+
+                  Expect.equal actual expected "should equal"
+                }
+
+                testAsync "should create an Ok AsyncResult given an int" {
+                    let value = 4
+
+                    let! actual = AsyncResult.singleton value
+                    let expected = Ok value
+
+                    Expect.equal actual expected "should equal"
+                }
+
+                testAsync "should create an Ok AsyncResult given a bool" {
+                    let value = true
+
+                    let! actual = AsyncResult.singleton value
+                    let expected = Ok value
+
+                    Expect.equal actual expected "should equal"
+                }
+
+                testAsync "should nest Ok in a Ok AsyncResult" {
+                    let value = Ok 1
+
+                    let! actual = AsyncResult.singleton value
+                    let expected = Ok value
+
+                    Expect.equal actual expected "should equal"
+                }
+
+                testAsync "should nest Error in a Ok AsyncResult" {
+                    let value = Error "This is in an Ok"
+
+                    let! actual = AsyncResult.singleton value
+                    let expected = Ok value
+
+                    Expect.equal actual expected "should equal"
+                } ] ]
 
 [<Tests>]
 let sequenceTests =
@@ -15,9 +64,9 @@ let sequenceTests =
             let expected = Ok [ 1; 2; 3 ]
 
             let input =
-                [ (toAsyncResult 1)
-                  (toAsyncResult 2)
-                  (toAsyncResult 3) ]
+                [ (AsyncResult.singleton 1)
+                  (AsyncResult.singleton 2)
+                  (AsyncResult.singleton 3) ]
 
             let! actual = AsyncResult.sequence input
             Expect.equal actual expected "should equal"
@@ -52,9 +101,9 @@ let traverseTests =
             let expected = Ok [ 1; 2; 3 ]
 
             let input =
-                [ (toAsyncResult 1)
-                  (toAsyncResult 2)
-                  (toAsyncResult 3) ]
+                [ (AsyncResult.singleton 1)
+                  (AsyncResult.singleton 2)
+                  (AsyncResult.singleton 3) ]
 
             let! actual = AsyncResult.traverse id input
             Expect.equal actual expected "should equal"
@@ -65,9 +114,9 @@ let traverseTests =
               let expected = Ok [ 11; 12; 13 ]
 
               let input =
-                  [ (toAsyncResult 1)
-                    (toAsyncResult 2)
-                    (toAsyncResult 3) ]
+                  [ (AsyncResult.singleton 1)
+                    (AsyncResult.singleton 2)
+                    (AsyncResult.singleton 3) ]
 
               let! actual = AsyncResult.traverse transformer input
               Expect.equal actual expected "should equal"
@@ -166,18 +215,18 @@ let applyTest =
               let x = 42
               let f = ((+) 10)
 
-              let xA = toAsyncResult x
-              let fA = toAsyncResult f
+              let xA = AsyncResult.singleton x
+              let fA = AsyncResult.singleton f
 
               let! actual = AsyncResult.apply fA xA
-              let! expectedValue = toAsyncResult (f x)
+              let! expectedValue = AsyncResult.singleton (f x)
 
               Expect.equal actual expectedValue "Should be equal"
           }
           testAsync "should follow the law of Composition (xA |> apply fA1 |> apply fA2 = apply fA1 (apply fA2 xA))" {
-              let fA1 = toAsyncResult ((+) 10)
-              let fA2 = toAsyncResult ((-) 2)
-              let xA = toAsyncResult 42
+              let fA1 = AsyncResult.singleton ((+) 10)
+              let fA2 = AsyncResult.singleton ((-) 2)
+              let xA = AsyncResult.singleton 42
 
               let! actual =
                   xA
@@ -196,7 +245,7 @@ let mapTests =
         [ testList
             "map"
             [ testAsync "should change the value in an AsyncResult" {
-                let input = toAsyncResult 3
+                let input = AsyncResult.singleton 3
 
                 let expectedValue = Ok 4
 
@@ -217,8 +266,8 @@ let mapTests =
           testList
               "map2"
               [ testAsync "should map over the value from two AsyncResult" {
-                  let input1 = toAsyncResult 3
-                  let input2 = toAsyncResult 7
+                  let input1 = AsyncResult.singleton 3
+                  let input2 = AsyncResult.singleton 7
 
                   let expectedValue = Ok 10
 
@@ -229,7 +278,7 @@ let mapTests =
 
                 testAsync "should fail if the first AsyncResult is an error" {
                     let input1 = AsyncResult.fromResult (Error "Not Ok")
-                    let input2 = toAsyncResult 3
+                    let input2 = AsyncResult.singleton 3
 
                     let expectedValue = Error "Not Ok"
 
@@ -239,7 +288,7 @@ let mapTests =
                 }
 
                 testAsync "should fail if the second AsyncResult is an error" {
-                    let input1 = toAsyncResult 3
+                    let input1 = AsyncResult.singleton 3
 
                     let input2 =
                         AsyncResult.fromResult (Error "Not Ok either")
@@ -252,8 +301,8 @@ let mapTests =
                 }
 
                 testAsync "should pass arguments in order" {
-                    let input1 = toAsyncResult 3
-                    let input2 = toAsyncResult 7
+                    let input1 = AsyncResult.singleton 3
+                    let input2 = AsyncResult.singleton 7
 
                     let expected = Ok(3, 7)
 
@@ -266,9 +315,9 @@ let mapTests =
           testList
               "map3"
               [ testAsync "should map over the value from three AsyncResult" {
-                  let input1 = toAsyncResult 3
-                  let input2 = toAsyncResult 7
-                  let input3 = toAsyncResult 4
+                  let input1 = AsyncResult.singleton 3
+                  let input2 = AsyncResult.singleton 7
+                  let input3 = AsyncResult.singleton 4
 
                   let expectedValue = Ok 14
 
@@ -278,8 +327,8 @@ let mapTests =
                 }
                 testAsync "should fail if the first AsyncResult is an error" {
                     let input1 = AsyncResult.fromResult (Error "Not Ok")
-                    let input2 = toAsyncResult 3
-                    let input3 = toAsyncResult 7
+                    let input2 = AsyncResult.singleton 3
+                    let input3 = AsyncResult.singleton 7
 
                     let expectedValue = Error "Not Ok"
 
@@ -288,12 +337,12 @@ let mapTests =
                     Expect.equal actual expectedValue "Should be equal"
                 }
                 testAsync "should fail if the second AsyncResult is an error" {
-                    let input1 = toAsyncResult 3
+                    let input1 = AsyncResult.singleton 3
 
                     let input2 =
                         AsyncResult.fromResult (Error "Not Ok either")
 
-                    let input3 = toAsyncResult 3
+                    let input3 = AsyncResult.singleton 3
 
                     let expectedValue = Error "Not Ok either"
 
@@ -302,9 +351,9 @@ let mapTests =
                     Expect.equal actual expectedValue "Should be equal"
                 }
                 testAsync "should fail if the third AsyncResult is an error" {
-                    let input1 = toAsyncResult 3
+                    let input1 = AsyncResult.singleton 3
 
-                    let input2 = toAsyncResult 12
+                    let input2 = AsyncResult.singleton 12
 
                     let input3 =
                         AsyncResult.fromResult (Error "Not Ok either")
@@ -316,9 +365,9 @@ let mapTests =
                     Expect.equal actual expectedValue "Should be equal"
                 }
                 testAsync "should pass arguments in order" {
-                    let input1 = toAsyncResult 3
-                    let input2 = toAsyncResult 7
-                    let input3 = toAsyncResult 12
+                    let input1 = AsyncResult.singleton 3
+                    let input2 = AsyncResult.singleton 7
+                    let input3 = AsyncResult.singleton 12
 
                     let expected = Ok(3, 7, 12)
 
@@ -331,10 +380,10 @@ let mapTests =
           testList
               "map4"
               [ testAsync "should map over the value from four AsyncResult" {
-                  let input1 = toAsyncResult 3
-                  let input2 = toAsyncResult 7
-                  let input3 = toAsyncResult 4
-                  let input4 = toAsyncResult 6
+                  let input1 = AsyncResult.singleton 3
+                  let input2 = AsyncResult.singleton 7
+                  let input3 = AsyncResult.singleton 4
+                  let input4 = AsyncResult.singleton 6
 
                   let expectedValue = Ok 20
 
@@ -344,9 +393,9 @@ let mapTests =
                 }
                 testAsync "should fail if the first AsyncResult is an error" {
                     let input1 = AsyncResult.fromResult (Error "Not Ok")
-                    let input2 = toAsyncResult 3
-                    let input3 = toAsyncResult 7
-                    let input4 = toAsyncResult 12
+                    let input2 = AsyncResult.singleton 3
+                    let input3 = AsyncResult.singleton 7
+                    let input4 = AsyncResult.singleton 12
 
                     let expectedValue = Error "Not Ok"
                     let! actual = AsyncResult.map4 (fun a b c d -> a + b + c + d) input1 input2 input3 input4
@@ -354,13 +403,13 @@ let mapTests =
                     Expect.equal actual expectedValue "Should be equal"
                 }
                 testAsync "should fail if the second AsyncResult is an error" {
-                    let input1 = toAsyncResult 3
+                    let input1 = AsyncResult.singleton 3
 
                     let input2 =
                         AsyncResult.fromResult (Error "Not Ok either")
 
-                    let input3 = toAsyncResult 3
-                    let input4 = toAsyncResult 5
+                    let input3 = AsyncResult.singleton 3
+                    let input4 = AsyncResult.singleton 5
 
                     let expectedValue = Error "Not Ok either"
 
@@ -369,14 +418,14 @@ let mapTests =
                     Expect.equal actual expectedValue "Should be equal"
                 }
                 testAsync "should fail if the third AsyncResult is an error" {
-                    let input1 = toAsyncResult 3
+                    let input1 = AsyncResult.singleton 3
 
-                    let input2 = toAsyncResult 12
+                    let input2 = AsyncResult.singleton 12
 
                     let input3 =
                         AsyncResult.fromResult (Error "Not Ok either")
 
-                    let input4 = toAsyncResult 5
+                    let input4 = AsyncResult.singleton 5
 
                     let expectedValue = Error "Not Ok either"
 
@@ -385,10 +434,10 @@ let mapTests =
                     Expect.equal actual expectedValue "Should be equal"
                 }
                 testAsync "should fail if the fourth AsyncResult is an error" {
-                    let input1 = toAsyncResult 3
+                    let input1 = AsyncResult.singleton 3
 
-                    let input2 = toAsyncResult 12
-                    let input3 = toAsyncResult 13
+                    let input2 = AsyncResult.singleton 12
+                    let input3 = AsyncResult.singleton 13
 
                     let input4 =
                         AsyncResult.fromResult (Error "Not Ok either")
@@ -400,10 +449,10 @@ let mapTests =
                     Expect.equal actual expectedValue "Should be equal"
                 }
                 testAsync "should pass arguments in order" {
-                    let input1 = toAsyncResult 3
-                    let input2 = toAsyncResult 7
-                    let input3 = toAsyncResult 12
-                    let input4 = toAsyncResult 0
+                    let input1 = AsyncResult.singleton 3
+                    let input2 = AsyncResult.singleton 7
+                    let input3 = AsyncResult.singleton 12
+                    let input4 = AsyncResult.singleton 0
 
                     let expected = Ok(3, 7, 12, 0)
 
@@ -416,8 +465,8 @@ let mapTests =
           testList
               "andMap"
               [ testAsync "should apply AsyncResult value to AsyncResult function" {
-                  let fA = toAsyncResult ((+) 10)
-                  let xA = toAsyncResult 20
+                  let fA = AsyncResult.singleton ((+) 10)
+                  let xA = AsyncResult.singleton 20
 
                   let expected = Ok 30
 
@@ -426,10 +475,12 @@ let mapTests =
                   Expect.equal actual expected "Should be equal"
                 }
                 testAsync "should be pipeable" {
-                    let fA = toAsyncResult (fun a b c -> a + b + c)
-                    let xA = toAsyncResult 10
-                    let yA = toAsyncResult 20
-                    let zA = toAsyncResult 30
+                    let fA =
+                        AsyncResult.singleton (fun a b c -> a + b + c)
+
+                    let xA = AsyncResult.singleton 10
+                    let yA = AsyncResult.singleton 20
+                    let zA = AsyncResult.singleton 30
 
                     let expected = Ok 60
 
@@ -442,13 +493,15 @@ let mapTests =
                     Expect.equal actual expected "Should be equal"
                 }
                 testAsync "should fail if there is an Error" {
-                    let fA = toAsyncResult (fun a b c -> a + b + c)
-                    let xA = toAsyncResult 10
+                    let fA =
+                        AsyncResult.singleton (fun a b c -> a + b + c)
+
+                    let xA = AsyncResult.singleton 10
 
                     let yA =
                         AsyncResult.fromResult (Error "Oh no an error")
 
-                    let zA = toAsyncResult 30
+                    let zA = AsyncResult.singleton 30
 
                     let expected = Error "Oh no an error"
 
@@ -468,9 +521,9 @@ let bindTests =
         [ testList
             "bind"
             [ testAsync "should change the value in an AsyncResult" {
-                let input = toAsyncResult 3
+                let input = AsyncResult.singleton 3
 
-                let f = ((+) 1 >> toAsyncResult)
+                let f = ((+) 1 >> AsyncResult.singleton)
 
                 let expectedValue = Ok 4
 
@@ -494,9 +547,9 @@ let bindTests =
           testList
               "bind2"
               [ testAsync "should map over the value from two AsyncResult" {
-                  let input1 = toAsyncResult 3
-                  let input2 = toAsyncResult 7
-                  let f a b = toAsyncResult (a + b)
+                  let input1 = AsyncResult.singleton 3
+                  let input2 = AsyncResult.singleton 7
+                  let f a b = AsyncResult.singleton (a + b)
 
                   let expectedValue = Ok 10
 
@@ -507,8 +560,8 @@ let bindTests =
 
                 testAsync "should fail if the first AsyncResult is an error" {
                     let input1 = AsyncResult.fromResult (Error "Not Ok")
-                    let input2 = toAsyncResult 3
-                    let f a b = toAsyncResult (a + b)
+                    let input2 = AsyncResult.singleton 3
+                    let f a b = AsyncResult.singleton (a + b)
 
                     let expectedValue = Error "Not Ok"
 
@@ -518,9 +571,9 @@ let bindTests =
                 }
 
                 testAsync "should fail if the second AsyncResult is an error" {
-                    let input1 = toAsyncResult 3
+                    let input1 = AsyncResult.singleton 3
                     let input2 = AsyncResult.fromResult (Error "Not Ok")
-                    let f a b = toAsyncResult (a + b)
+                    let f a b = AsyncResult.singleton (a + b)
 
                     let expectedValue = Error "Not Ok"
 
@@ -530,12 +583,12 @@ let bindTests =
                 }
 
                 testAsync "should pass arguments in order" {
-                    let input1 = toAsyncResult 3
-                    let input2 = toAsyncResult 7
+                    let input1 = AsyncResult.singleton 3
+                    let input2 = AsyncResult.singleton 7
 
                     let expected = Ok(3, 7)
 
-                    let! actual = AsyncResult.bind2 (fun a b -> toAsyncResult (a, b)) input1 input2
+                    let! actual = AsyncResult.bind2 (fun a b -> AsyncResult.singleton (a, b)) input1 input2
 
                     Expect.equal actual expected "Should be equal"
 
@@ -544,10 +597,10 @@ let bindTests =
           testList
               "bind3"
               [ testAsync "should map over the value from three AsyncResult" {
-                  let input1 = toAsyncResult 3
-                  let input2 = toAsyncResult 7
-                  let input3 = toAsyncResult 32
-                  let f a b c = toAsyncResult (a + b + c)
+                  let input1 = AsyncResult.singleton 3
+                  let input2 = AsyncResult.singleton 7
+                  let input3 = AsyncResult.singleton 32
+                  let f a b c = AsyncResult.singleton (a + b + c)
 
                   let expectedValue = Ok 42
 
@@ -558,9 +611,9 @@ let bindTests =
 
                 testAsync "should fail if the first AsyncResult is an error" {
                     let input1 = AsyncResult.fromResult (Error "Not Ok")
-                    let input2 = toAsyncResult 3
-                    let input3 = toAsyncResult 32
-                    let f a b c = toAsyncResult (a + b + c)
+                    let input2 = AsyncResult.singleton 3
+                    let input3 = AsyncResult.singleton 32
+                    let f a b c = AsyncResult.singleton (a + b + c)
 
                     let expectedValue = Error "Not Ok"
 
@@ -570,10 +623,10 @@ let bindTests =
                 }
 
                 testAsync "should fail if the second AsyncResult is an error" {
-                    let input1 = toAsyncResult 3
+                    let input1 = AsyncResult.singleton 3
                     let input2 = AsyncResult.fromResult (Error "Not Ok")
-                    let input3 = toAsyncResult 4
-                    let f a b c = toAsyncResult (a + b + c)
+                    let input3 = AsyncResult.singleton 4
+                    let f a b c = AsyncResult.singleton (a + b + c)
 
                     let expectedValue = Error "Not Ok"
 
@@ -583,10 +636,10 @@ let bindTests =
                 }
 
                 testAsync "should fail if the third AsyncResult is an error" {
-                    let input1 = toAsyncResult 3
-                    let input2 = toAsyncResult 4
+                    let input1 = AsyncResult.singleton 3
+                    let input2 = AsyncResult.singleton 4
                     let input3 = AsyncResult.fromResult (Error "Not Ok")
-                    let f a b c = toAsyncResult (a + b + c)
+                    let f a b c = AsyncResult.singleton (a + b + c)
 
                     let expectedValue = Error "Not Ok"
 
@@ -596,13 +649,13 @@ let bindTests =
                 }
 
                 testAsync "should pass arguments in order" {
-                    let input1 = toAsyncResult 3
-                    let input2 = toAsyncResult 7
-                    let input3 = toAsyncResult 99
+                    let input1 = AsyncResult.singleton 3
+                    let input2 = AsyncResult.singleton 7
+                    let input3 = AsyncResult.singleton 99
 
                     let expected = Ok(3, 7, 99)
 
-                    let! actual = AsyncResult.bind3 (fun a b c -> toAsyncResult (a, b, c)) input1 input2 input3
+                    let! actual = AsyncResult.bind3 (fun a b c -> AsyncResult.singleton (a, b, c)) input1 input2 input3
 
                     Expect.equal actual expected "Should be equal"
 
@@ -611,11 +664,11 @@ let bindTests =
           testList
               "bind4"
               [ testAsync "should map over the value from four AsyncResult" {
-                  let input1 = toAsyncResult 3
-                  let input2 = toAsyncResult 7
-                  let input3 = toAsyncResult 32
-                  let input4 = toAsyncResult 10
-                  let f a b c d = toAsyncResult (a + b + c + d)
+                  let input1 = AsyncResult.singleton 3
+                  let input2 = AsyncResult.singleton 7
+                  let input3 = AsyncResult.singleton 32
+                  let input4 = AsyncResult.singleton 10
+                  let f a b c d = AsyncResult.singleton (a + b + c + d)
 
                   let expectedValue = Ok 52
 
@@ -626,10 +679,10 @@ let bindTests =
 
                 testAsync "should fail if the first AsyncResult is an error" {
                     let input1 = AsyncResult.fromResult (Error "Not Ok")
-                    let input2 = toAsyncResult 3
-                    let input3 = toAsyncResult 32
-                    let input4 = toAsyncResult 10
-                    let f a b c d = toAsyncResult (a + b + c + d)
+                    let input2 = AsyncResult.singleton 3
+                    let input3 = AsyncResult.singleton 32
+                    let input4 = AsyncResult.singleton 10
+                    let f a b c d = AsyncResult.singleton (a + b + c + d)
 
                     let expectedValue = Error "Not Ok"
 
@@ -639,11 +692,11 @@ let bindTests =
                 }
 
                 testAsync "should fail if the second AsyncResult is an error" {
-                    let input1 = toAsyncResult 3
+                    let input1 = AsyncResult.singleton 3
                     let input2 = AsyncResult.fromResult (Error "Not Ok")
-                    let input3 = toAsyncResult 4
-                    let input4 = toAsyncResult 10
-                    let f a b c d = toAsyncResult (a + b + c + d)
+                    let input3 = AsyncResult.singleton 4
+                    let input4 = AsyncResult.singleton 10
+                    let f a b c d = AsyncResult.singleton (a + b + c + d)
 
                     let expectedValue = Error "Not Ok"
 
@@ -653,11 +706,11 @@ let bindTests =
                 }
 
                 testAsync "should fail if the third AsyncResult is an error" {
-                    let input1 = toAsyncResult 3
-                    let input2 = toAsyncResult 4
+                    let input1 = AsyncResult.singleton 3
+                    let input2 = AsyncResult.singleton 4
                     let input3 = AsyncResult.fromResult (Error "Not Ok")
-                    let input4 = toAsyncResult 10
-                    let f a b c d = toAsyncResult (a + b + c + d)
+                    let input4 = AsyncResult.singleton 10
+                    let f a b c d = AsyncResult.singleton (a + b + c + d)
 
                     let expectedValue = Error "Not Ok"
 
@@ -667,11 +720,11 @@ let bindTests =
                 }
 
                 testAsync "should fail if the fourth AsyncResult is an error" {
-                    let input1 = toAsyncResult 3
-                    let input2 = toAsyncResult 4
-                    let input3 = toAsyncResult 10
+                    let input1 = AsyncResult.singleton 3
+                    let input2 = AsyncResult.singleton 4
+                    let input3 = AsyncResult.singleton 10
                     let input4 = AsyncResult.fromResult (Error "Not Ok")
-                    let f a b c d = toAsyncResult (a + b + c + d)
+                    let f a b c d = AsyncResult.singleton (a + b + c + d)
 
                     let expectedValue = Error "Not Ok"
 
@@ -681,15 +734,20 @@ let bindTests =
                 }
 
                 testAsync "should pass arguments in order" {
-                    let input1 = toAsyncResult 3
-                    let input2 = toAsyncResult 7
-                    let input3 = toAsyncResult 99
-                    let input4 = toAsyncResult 15
+                    let input1 = AsyncResult.singleton 3
+                    let input2 = AsyncResult.singleton 7
+                    let input3 = AsyncResult.singleton 99
+                    let input4 = AsyncResult.singleton 15
 
                     let expected = Ok(3, 7, 99, 15)
 
                     let! actual =
-                        AsyncResult.bind4 (fun a b c d -> toAsyncResult (a, b, c, d)) input1 input2 input3 input4
+                        AsyncResult.bind4
+                            (fun a b c d -> AsyncResult.singleton (a, b, c, d))
+                            input1
+                            input2
+                            input3
+                            input4
 
                     Expect.equal actual expected "Should be equal"
 
@@ -698,12 +756,14 @@ let bindTests =
           testList
               "bind5"
               [ testAsync "should map over the value from five AsyncResult" {
-                    let input1 = toAsyncResult 3
-                    let input2 = toAsyncResult 7
-                    let input3 = toAsyncResult 32
-                    let input4 = toAsyncResult 10
-                    let input5 = toAsyncResult 115
-                    let f a b c d e = toAsyncResult (a + b + c + d + e)
+                    let input1 = AsyncResult.singleton 3
+                    let input2 = AsyncResult.singleton 7
+                    let input3 = AsyncResult.singleton 32
+                    let input4 = AsyncResult.singleton 10
+                    let input5 = AsyncResult.singleton 115
+
+                    let f a b c d e =
+                        AsyncResult.singleton (a + b + c + d + e)
 
                     let expectedValue = Ok 167
 
