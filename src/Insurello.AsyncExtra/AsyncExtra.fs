@@ -115,6 +115,3 @@ module AsyncResult =
 
     let bind5 : ('a -> 'b -> 'c -> 'd -> 'e -> AsyncResult<'f, 'err>) -> AsyncResult<'a, 'err> -> AsyncResult<'b, 'err> -> AsyncResult<'c, 'err> -> AsyncResult<'d, 'err> -> AsyncResult<'e, 'err> -> AsyncResult<'f, 'err> =
         fun f a1 a2 a3 a4 a5 -> map5 f a1 a2 a3 a4 a5 |> bind id
-
-    let andBind : AsyncResult<'a, 'err> -> AsyncResult<('a -> AsyncResult<'b, 'err>), 'err> -> AsyncResult<'b, 'err> =
-        fun a1 a2 -> andMap a1 a2 |> bind id
