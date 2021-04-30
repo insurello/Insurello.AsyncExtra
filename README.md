@@ -94,7 +94,7 @@ The functions need to be prefixed with `AsyncResult.`.
 singleton : 'a -> AsyncResult<'a, 'err>
 ```
 
-The easiest way to create a new `AsyncResult`.
+The easiest way to create a new `AsyncResult` with an `Ok` value.
 
 ##### fromResult
 
@@ -110,7 +110,7 @@ Convert a `Result` into a `AsyncResult`.
 fromOption : 'err -> Option<'a> -> AsyncResult<'a, 'err>
 ```
 
-Convert an `Option` into a `AsyncResult`. You need to first provide the `Error` value that should be used if the option is `None`.
+Convert an `Option` into an `AsyncResult`. The first argument is the `Error` value that should be used if the option is `None`.
 
 ##### fromTask
 
@@ -161,7 +161,7 @@ fetchUser : int -> AsyncResult<User, string>
 fetchFriends : User -> AsyncResult<string list, string>
 
 fetchUser 1 // Async<Ok { name: "Mary"; friends: [2; 3] }>
-|> AsyncResult.bind fetchFriends // Async<Ok ["Peter"; "John"]>
+|> AsyncResult.bind fetchFriends // Async<Ok ["Peter"; "Paul"]>
 
 fetchUser 5 // Async<Error "Can't find a user with that id">
 |> AsyncResult.bind fetchFriends // Will never run
@@ -244,10 +244,10 @@ let xA = AsyncResult.singleton 10
 let yA = AsyncResult.singleton 20
 let zA = AsyncResult.singleton 30
 
-add3 // Ok (fun a b c -> a + b + c)
-|> AsyncResult.andMap xA // Ok (fun b c -> 10 + b + c)
-|> AsyncResult.andMap yA // Ok (fun c -> 10 + 20 + c)
-|> AsyncResult.andMap zA // OK 60
+add3 // Async<Ok (fun a b c -> a + b + c)>
+|> AsyncResult.andMap xA // Async<Ok (fun b c -> 10 + b + c)>
+|> AsyncResult.andMap yA // Async<Ok (fun c -> 10 + 20 + c)>
+|> AsyncResult.andMap zA // Async<OK 60>
 ```
 
 ##### bind2
@@ -256,7 +256,7 @@ add3 // Ok (fun a b c -> a + b + c)
 bind2 : ('a -> 'b -> AsyncResult<'c, 'err>) -> AsyncResult<'a, 'err> -> AsyncResult<'b, 'err> -> AsyncResult<'c, 'err>
 ```
 
-You can use `bind2` to the same problem as `map2` if your transformation function returns an `AsyncResult`. In other words, their relationship is the same as `map` and `bind`.
+You can use `bind2` to solve the same problem as `map2` if your transformation function returns an `AsyncResult`. In other words, their relationship is the same as `map` and `bind`.
 
 ##### bind3
 
@@ -306,7 +306,7 @@ userIds // [1; 2; 3]
 traverse : ('a -> 'b) -> List<AsyncResult<'a, 'err>> -> AsyncResult<'b list, 'err>
 ```
 
-Similar to `sequence`, `traverse` will also change the type from a list of `AsyncResult` to an `AsyncResult` with a list. The difference is that `traverse` allows you to use a transformation function to transform the each value in the list of `AsyncResult`.
+Similar to `sequence`, `traverse` will also change the type from a list of `AsyncResult` to an `AsyncResult` with a list. The difference is that `traverse` allows you to use a transformation function to transform each value in the list of `AsyncResult`.
 
 By sending in `id` as the transform function you have implemented `sequence`. Let's have a look how we can solve the example in the `sequence` description using `traverse` instead.
 
