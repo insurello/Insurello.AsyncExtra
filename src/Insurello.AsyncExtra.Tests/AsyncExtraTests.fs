@@ -12,14 +12,12 @@ let sequenceTests =
     testList
         "Sequence tests"
         [ testAsync "should return values in same order as given tasks" {
-            let dummyAsync : int -> AsyncResult<int, string> = Ok >> AsyncResult.fromResult
-
             let expected = Ok [ 1; 2; 3 ]
 
             let input =
-                [ (dummyAsync 1)
-                  (dummyAsync 2)
-                  (dummyAsync 3) ]
+                [ (toAsyncResult 1)
+                  (toAsyncResult 2)
+                  (toAsyncResult 3) ]
 
             let! actual = AsyncResult.sequence input
             Expect.equal actual expected "should equal"
