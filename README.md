@@ -155,7 +155,7 @@ AsyncResult.map increase eA // Async<Error 2>
 mapError : ('errX -> 'errY) -> AsyncResult<'a, 'errX> -> AsyncResult<'a, 'errY>
 ```
 
-Similar to `map` but will instead apply the transformation function to the `Error`.
+Similar to [`map`](#map) but will instead apply the transformation function to the `Error`.
 
 ##### bind
 
@@ -163,7 +163,7 @@ Similar to `map` but will instead apply the transformation function to the `Erro
 bind : ('a -> AsyncResult<'b, 'err>) -> AsyncResult<'a, 'err> -> AsyncResult<'b, 'err>
 ```
 
-Sometimes you want to use a transform function that will return an `AsyncResult` but you don't want to end up with a nested `AsyncResult<AsyncResult<'b, 'err>, 'err>`. This is where `bind` shines. It will transform the value, in the same way as `map`, but will flatten the returning `AsyncResult` and will return an `AsyncResult<'b, 'err>`. `Bind` is also known as `andThen` in Elm and `chain` in JavaScript.
+Sometimes you want to use a transform function that will return an `AsyncResult` but you don't want to end up with a nested `AsyncResult<AsyncResult<'b, 'err>, 'err>`. This is where `bind` shines. It will transform the value, in the same way as [`map`](#map), but will flatten the returning `AsyncResult` and will return an `AsyncResult<'b, 'err>`. `Bind` is also known as `andThen` in Elm and `chain` in JavaScript.
 
 ```fsharp
 fetchUser : int -> AsyncResult<User, string>
@@ -185,7 +185,7 @@ fetchUser 4 // Async<Ok { name: "The Grinch"; friends: [] }>
 bindError : ('errX -> AsyncResult<'a, 'errY>) -> AsyncResult<'a, 'errX> -> AsyncResult<'a, 'errY>
 ```
 
-Similar to `bind` but will instead apply the AsyncResult returning transformation function to the `Error`.
+Similar to [`bind`](#bind) but will instead apply the AsyncResult returning transformation function to the `Error`.
 
 ##### apply
 
@@ -220,7 +220,7 @@ AsyncResult.map2 add xA yA // Async<Ok 7>
 map3 : ('a -> 'b -> 'c -> 'd) -> AsyncResult<'a, 'err> -> AsyncResult<'b, 'err> -> AsyncResult<'c, 'err> -> AsyncResult<'d, 'err>
 ```
 
-Solves the same problem as `map2` but for three arguments.
+Solves the same problem as [`map2`](#map2) but for three arguments.
 
 ##### map4
 
@@ -228,7 +228,7 @@ Solves the same problem as `map2` but for three arguments.
 map4 : ('a -> 'b -> 'c -> 'd -> 'e) -> AsyncResult<'a, 'err> -> AsyncResult<'b, 'err> -> AsyncResult<'c, 'err> -> AsyncResult<'d, 'err> -> AsyncResult<'e, 'err>
 ```
 
-Solves the same problem as `map2` but for four arguments.
+Solves the same problem as [`map2`](#map2) but for four arguments.
 
 ##### map5
 
@@ -236,7 +236,7 @@ Solves the same problem as `map2` but for four arguments.
 map5 : ('a -> 'b -> 'c -> 'd -> 'e -> 'f) -> AsyncResult<'a, 'err> -> AsyncResult<'b, 'err> -> AsyncResult<'c, 'err> -> AsyncResult<'d, 'err> -> AsyncResult<'e, 'err> -> AsyncResult<'f, 'err>
 ```
 
-Solves the same problem as `map2` but for five arguments.
+Solves the same problem as [`map2`](#map2) but for five arguments.
 
 ##### andMap
 
@@ -244,7 +244,7 @@ Solves the same problem as `map2` but for five arguments.
 andMap : AsyncResult<'a, 'err> -> AsyncResult<('a -> 'b), 'err> -> AsyncResult<'b, 'err>
 ```
 
-In most cases `map2`-`map5` should be enough but in those cases you want to apply more arguments you can use `andMap`. Technically, `andMap` is the same as `apply` but the order of the arguments are reversed. While `apply` takes the function first and then the value, `andMap` takes the value first and then the function. This allow you to have a similar structure to your code as you would have using `mapX`.
+In most cases `map2`-`map5` should be enough but in those cases you want to apply more arguments you can use `andMap`. Technically, `andMap` is the same as [`apply`](#apply) but the order of the arguments are reversed. While `apply` takes the function first and then the value, `andMap` takes the value first and then the function. This allow you to have a similar structure to your code as you would have using `mapX`.
 
 ```fsharp
 let add3 = AsyncResult.singleton (fun a b c -> a + b + c)
@@ -265,7 +265,7 @@ add3 // Async<Ok (fun a b c -> a + b + c)>
 bind2 : ('a -> 'b -> AsyncResult<'c, 'err>) -> AsyncResult<'a, 'err> -> AsyncResult<'b, 'err> -> AsyncResult<'c, 'err>
 ```
 
-You can use `bind2` to solve the same problem as `map2` if your transformation function returns an `AsyncResult`. In other words, their relationship is the same as `map` and `bind`.
+You can use `bind2` to solve the same problem as [`map2`](#map2) if your transformation function returns an `AsyncResult`. In other words, their relationship is the same as `map` and `bind`.
 
 ##### bind3
 
@@ -273,7 +273,7 @@ You can use `bind2` to solve the same problem as `map2` if your transformation f
 bind3 : ('a -> 'b -> 'c -> AsyncResult<'d, 'err>) -> AsyncResult<'a, 'err> -> AsyncResult<'b, 'err> -> AsyncResult<'c, 'err> -> AsyncResult<'d, 'err>
 ```
 
-Solves the same problem as `bind2` but for three arguments.
+Solves the same problem as [`bind2`](#bind2) but for three arguments.
 
 ##### bind4
 
@@ -281,7 +281,7 @@ Solves the same problem as `bind2` but for three arguments.
 bind4 : ('a -> 'b -> 'c -> 'd -> AsyncResult<'e, 'err>) -> AsyncResult<'a, 'err> -> AsyncResult<'b, 'err> -> AsyncResult<'c, 'err> -> AsyncResult<'d, 'err> -> AsyncResult<'e, 'err>
 ```
 
-Solves the same problem as `bind2` but for four arguments.
+Solves the same problem as [`bind2`](#bind2) but for four arguments.
 
 ##### bind5
 
@@ -289,7 +289,7 @@ Solves the same problem as `bind2` but for four arguments.
 bind5 : ('a -> 'b -> 'c -> 'd -> 'e -> AsyncResult<'f, 'err>) -> AsyncResult<'a, 'err> -> AsyncResult<'b, 'err> -> AsyncResult<'c, 'err> -> AsyncResult<'d, 'err> -> AsyncResult<'e, 'err> -> AsyncResult<'f, 'err>
 ```
 
-Solves the same problem as `bind2` but for five arguments.
+Solves the same problem as [`bind2`](#bind2) but for five arguments.
 
 #### Lists
 
@@ -315,7 +315,7 @@ userIds // [1; 2; 3]
 traverse : ('a -> 'b) -> List<AsyncResult<'a, 'err>> -> AsyncResult<'b list, 'err>
 ```
 
-Similar to `sequence`, `traverse` will also change the type from a list of `AsyncResult` to an `AsyncResult` with a list. The difference is that `traverse` allows you to use a transformation function to transform each value in the list of `AsyncResult`.
+Similar to [`sequence`](#sequence), `traverse` will also change the type from a list of `AsyncResult` to an `AsyncResult` with a list. The difference is that `traverse` allows you to use a transformation function to transform each value in the list of `AsyncResult`.
 
 By sending in `id` as the transform function you have implemented `sequence`. Let's have a look how we can solve the example in the `sequence` description using `traverse` instead.
 
@@ -327,7 +327,3 @@ AsyncResult.traverse fetchUser userIds// Async<Ok [User, User, User]>
 ```
 
 [![Insurello](https://gitcdn.xyz/repo/insurello/elm-swedish-bank-account-number/master/insurello.svg)](https://jobb.insurello.se/departments/product-tech)
-
-```
-
-```
