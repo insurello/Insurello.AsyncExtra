@@ -136,9 +136,18 @@ Convert a unit `Task` into a `AsyncResult`.
 map : ('a -> 'b) -> AsyncResult<'a, 'err> -> AsyncResult<'b, 'err>
 ```
 
-Used to apply transformations to `Ok` values of an `AsyncResult`, `map` takes a function that it will lift into the context of the `AsyncResult` and apply to it the wrapped value. A new `AsyncResult` with the transformed value will be returned. If the instance contains an `Error` the transformation function will never be applied.
+You will most likely want to change the value in the `AsyncResult` by running functions. This is where `map` comes in handy. You send in a transformation function that will transform the value and `map` will then take the value from your `AsyncResult` run the function and return a brand new `AsyncResult` containing the new value. Worth keeping in mind is that the transformation function will only run if there is an `Ok` `AsyncResult`. If the `AsyncResult` contains an `Error` nothing will happen.
 
-If the transform function will return an `AsyncResult` you might want to use `bind` instead.
+If the transform function will return an `AsyncResult` you might want to use [`bind`](#bind) instead.
+
+```fsharp
+let increase x = x + 1
+let xA = AsyncResult.singleton 2
+let eA = AsyncResult.fromResult (Error 2)
+
+AsyncResult.map increase xA // Async<Ok 3>
+AsyncResult.map increase eA // Async<Error 2>
+```
 
 ##### mapError
 
