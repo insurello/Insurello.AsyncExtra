@@ -75,23 +75,19 @@ module AsyncResult =
                     | Error err1, Error _ -> Error err1
             }
 
-    let private (<!>) = map
-    let private (<*>) = apply
-
     let traverse : ('a -> 'b) -> List<AsyncResult<'a, 'err>> -> AsyncResult<'b list, 'err> =
         fun transformer list ->
-            let cons head tail = head :: tail
-
             let rec fold acc =
                 function
-                | [] -> acc
-                | xA :: xAs ->
-                    (transformer >> cons) <!> xA <*> acc
-                    |> bind (fun nextAcc -> fold (singleton nextAcc) xAs)
+                | [] -> acc |> List.rev |> singleton
+                | xA :: xAs -> bind (fun x -> fold (transformer x :: acc) xAs) xA
 
-            fold (singleton []) list |> map List.rev
+            fold [] list
 
     let sequence : List<AsyncResult<'a, 'error>> -> AsyncResult<'a list, 'error> = fun list -> traverse id list
+
+    let private (<!>) = map
+    let private (<*>) = apply
 
     let map2 : ('a -> 'b -> 'c) -> AsyncResult<'a, 'err> -> AsyncResult<'b, 'err> -> AsyncResult<'c, 'err> =
         fun f a1 a2 -> f <!> a1 <*> a2
