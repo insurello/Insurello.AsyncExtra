@@ -80,16 +80,16 @@ module AsyncResult =
 
     let traverse : ('a -> 'b) -> List<AsyncResult<'a, 'err>> -> AsyncResult<'b list, 'err> =
         fun transformer list ->
-            let append head tail = tail @ [ head ]
+            let cons head tail = head :: tail
 
             let rec fold acc =
                 function
                 | [] -> acc
                 | xA :: xAs ->
-                    (transformer >> append) <!> xA <*> acc
+                    (transformer >> cons) <!> xA <*> acc
                     |> bind (fun nextAcc -> fold (singleton nextAcc) xAs)
 
-            fold (singleton []) list
+            fold (singleton []) list |> map List.rev
 
     let sequence : List<AsyncResult<'a, 'error>> -> AsyncResult<'a list, 'error> = fun list -> traverse id list
 
