@@ -77,12 +77,14 @@ module AsyncResult =
 
     let traverse : ('a -> 'b) -> List<AsyncResult<'a, 'err>> -> AsyncResult<'b list, 'err> =
         fun transformer list ->
-            let cons head tail = head :: tail
+            let cons tail head = head :: tail
 
-            let mapConcat headR tailR =
-                apply (map (transformer >> cons) headR) tailR
+            let rec fold remaining acc =
+                match remaining with
+                | [] -> acc |> List.rev |> singleton
+                | xA :: xAs -> xA |> bind (transformer >> cons acc >> fold xAs)
 
-            List.foldBack mapConcat list (singleton [])
+            fold list []
 
     let sequence : List<AsyncResult<'a, 'error>> -> AsyncResult<'a list, 'error> = fun list -> traverse id list
 

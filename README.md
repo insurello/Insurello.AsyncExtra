@@ -299,7 +299,7 @@ Solves the same problem as [`bind2`](#bind2) but for five arguments.
 sequence : List<AsyncResult<'a, 'error>> -> AsyncResult<'a list, 'error>
 ```
 
-From time to time you will find yourself having a list of `AsyncResult` (`List<AsyncResult<'a, 'err>`) but you would rather have an `AsyncResult` with a list of values (`AsyncResult<'a list, 'error>`). In those cases `sequence` can help you.
+From time to time you will find yourself having a list of `AsyncResult` (`List<AsyncResult<'a, 'err>`) but you would rather have an `AsyncResult` with a list of values (`AsyncResult<'a list, 'error>`). In those cases `sequence` can help you. `sequence` will make an early return if it reaches an `Error`.
 
 ```fsharp
 fetchUser : int -> AsyncResult<User, string>
@@ -315,7 +315,7 @@ userIds // [1; 2; 3]
 traverse : ('a -> 'b) -> List<AsyncResult<'a, 'err>> -> AsyncResult<'b list, 'err>
 ```
 
-Similar to [`sequence`](#sequence), `traverse` will also change the type from a list of `AsyncResult` to an `AsyncResult` with a list. The difference is that `traverse` allows you to use a transformation function to transform each value in the list of `AsyncResult`.
+Similar to [`sequence`](#sequence), `traverse` will also change the type from a list of `AsyncResult` to an `AsyncResult` with a list. The difference is that `traverse` allows you to use a transformation function to transform each value in the list of `AsyncResult`. `traverse` will make an early return if it reaches an `Error`.
 
 By sending in `id` as the transform function you have implemented `sequence`. Let's have a look how we can solve the example in the `sequence` description using `traverse` instead.
 
