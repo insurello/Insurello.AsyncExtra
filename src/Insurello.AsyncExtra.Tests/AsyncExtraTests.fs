@@ -94,6 +94,24 @@ let traverseTests =
               let! actual = AsyncResult.traverse transformer input
               Expect.equal actual expected "should equal"
           }
+          testAsync "should make an early return if there is an Error" {
+              let mutable counter = 0
+
+              let transformer x =
+                  counter <- counter + x
+                  x
+
+              let expected = 1
+
+              let input =
+                  [ (AsyncResult.singleton 1)
+                    (AsyncResult.fromResult (Error "Skip next"))
+                    (AsyncResult.singleton 3) ]
+
+              let! _ = AsyncResult.traverse transformer input
+
+              Expect.equal counter expected "should equal"
+          }
           testAsync "should execute async task in sequence" {
               let mutable orderRun = []
 
