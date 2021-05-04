@@ -75,19 +75,23 @@ module AsyncResult =
                     | Error err1, Error _ -> Error err1
             }
 
-    let traverse : ('a -> 'b) -> List<AsyncResult<'a, 'err>> -> AsyncResult<'b list, 'err> =
-        fun transformer list ->
-            let cons head tail = head :: tail
-
-            let mapConcat headR tailR =
-                apply (map (transformer >> cons) headR) tailR
-
-            List.foldBack mapConcat list (singleton [])
-
-    let sequence : List<AsyncResult<'a, 'error>> -> AsyncResult<'a list, 'error> = fun list -> traverse id list
-
     let private (<!>) = map
     let private (<*>) = apply
+
+    let traverse : ('a -> 'b) -> List<AsyncResult<'a, 'err>> -> AsyncResult<'b list, 'err> =
+        fun transformer list ->
+            let append head tail = tail @ [ head ]
+
+            let rec fold acc =
+                function
+                | [] -> acc
+                | xA :: xAs ->
+                    (transformer >> append) <!> xA <*> acc
+                    |> bind (fun nextAcc -> fold (singleton nextAcc) xAs)
+
+            fold (singleton []) list
+
+    let sequence : List<AsyncResult<'a, 'error>> -> AsyncResult<'a list, 'error> = fun list -> traverse id list
 
     let map2 : ('a -> 'b -> 'c) -> AsyncResult<'a, 'err> -> AsyncResult<'b, 'err> -> AsyncResult<'c, 'err> =
         fun f a1 a2 -> f <!> a1 <*> a2
