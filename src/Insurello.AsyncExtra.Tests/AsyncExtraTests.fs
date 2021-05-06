@@ -44,6 +44,19 @@ let sequenceTests =
             let! actual = AsyncResult.sequence input
             Expect.equal actual expected "should equal"
           }
+          testAsync "should prove example" {
+              let fetchUser : int -> AsyncResult<int, 'err> = AsyncResult.singleton
+
+              let userIds = [ 1; 2; 3 ]
+              let expected = Ok userIds
+
+              let! actual =
+                  userIds
+                  |> List.map fetchUser
+                  |> AsyncResult.sequence
+
+              Expect.equal actual expected "should equal"
+          }
           testAsync "should execute async task in sequence" {
               let mutable orderRun = []
 
@@ -71,67 +84,57 @@ let traverseTests =
     testList
         "Traverse tests"
         [ testAsync "should return values in same order as given tasks" {
+            let input = [ 1; 2; 3 ]
             let expected = Ok [ 1; 2; 3 ]
 
-            let input =
-                [ (AsyncResult.singleton 1)
-                  (AsyncResult.singleton 2)
-                  (AsyncResult.singleton 3) ]
-
-            let! actual = AsyncResult.traverse id input
+            let! actual = AsyncResult.traverse AsyncResult.singleton input
             Expect.equal actual expected "should equal"
           }
           testAsync "should return map the AsyncResult values" {
-              let transformer = ((+) 10)
+              let transformer = ((+) 10) >> AsyncResult.singleton
 
+              let input = [ 1; 2; 3 ]
               let expected = Ok [ 11; 12; 13 ]
-
-              let input =
-                  [ (AsyncResult.singleton 1)
-                    (AsyncResult.singleton 2)
-                    (AsyncResult.singleton 3) ]
 
               let! actual = AsyncResult.traverse transformer input
               Expect.equal actual expected "should equal"
           }
           testAsync "should make an early return if there is an Error" {
-              let mutable counter = 0
+              let mutable currentItem = 0
 
               let transformer x =
-                  counter <- counter + x
-                  x
+                  currentItem <- x
 
-              let expected = 1
+                  if x = 2 then
+                      AsyncResult.fromResult (Error "Skip next")
+                  else
+                      AsyncResult.singleton x
 
-              let input =
-                  [ (AsyncResult.singleton 1)
-                    (AsyncResult.fromResult (Error "Skip next"))
-                    (AsyncResult.singleton 3) ]
+              let! _ = AsyncResult.traverse transformer [ 1; 2; 3 ]
 
-              let! _ = AsyncResult.traverse transformer input
+              Expect.equal currentItem 2 "should equal"
+          }
+          testAsync "should prove example" {
+              let fetchUser : int -> AsyncResult<int, 'err> = AsyncResult.singleton
 
-              Expect.equal counter expected "should equal"
+              let userIds = [ 1; 2; 3 ]
+
+              let expected = Ok userIds
+
+              let! actual = AsyncResult.traverse fetchUser userIds
+
+              Expect.equal actual expected "should equal"
           }
           testAsync "should execute async task in sequence" {
-              let mutable orderRun = []
+              let delay x =
+                  Async.Sleep(x * 100)
+                  |> Async.bind (fun _ -> AsyncResult.singleton x)
 
-              let dummyAsync : int -> AsyncResult<int, string> =
-                  fun i ->
-                      AsyncResult.fromResult (Ok i)
-                      |> AsyncResult.map
-                          (fun j ->
-                              orderRun <- List.append orderRun [ j ]
-                              j)
+              let input = [ 0; 14; 1; 3 ]
+              let expected = Ok input
 
-              let input =
-                  [ Async.Sleep 100
-                    |> Async.bind (fun _ -> dummyAsync 1)
-                    (dummyAsync 2)
-                    (dummyAsync 3) ]
-
-              let expectedOkValue = [ 1; 2; 3 ]
-              let! _actual = AsyncResult.traverse id input
-              Expect.equal orderRun expectedOkValue "Should be run in same order"
+              let! actual = AsyncResult.traverse delay input
+              Expect.equal actual expected "Should be run in same order"
           } ]
 
 [<Tests>]
@@ -193,17 +196,15 @@ let taskTests =
 let applyTest =
     testList
         "Test apply"
-        [
+        [ testAsync "should apply the value to function" {
+            let xA = AsyncResult.singleton 42
+            let fA = AsyncResult.singleton ((+) 10)
 
-          testAsync "should apply the value to function" {
-              let xA = AsyncResult.singleton 42
-              let fA = AsyncResult.singleton ((+) 10)
+            let! actual = AsyncResult.apply fA xA
 
-              let! actual = AsyncResult.apply fA xA
+            let expectedValue = Ok 52
 
-              let expectedValue = Ok 52
-
-              Expect.equal actual expectedValue "Should be equal"
+            Expect.equal actual expectedValue "Should be equal"
           }
 
           testAsync "should apply the value to all functions" {

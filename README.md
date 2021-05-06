@@ -312,7 +312,7 @@ userIds // [1; 2; 3]
 ##### traverse
 
 ```fsharp
-traverse : ('a -> 'b) -> List<AsyncResult<'a, 'err>> -> AsyncResult<'b list, 'err>
+traverse : ('a -> AsyncResult<'b, 'err>) -> List<'a> -> AsyncResult<'b list, 'err>
 ```
 
 Similar to [`sequence`](#sequence), `traverse` will also change the type from a list of `AsyncResult` to an `AsyncResult` with a list. The difference is that `traverse` allows you to use a transformation function to transform each value in the list of `AsyncResult`. `traverse` will make an early return if it reaches an `Error`.
