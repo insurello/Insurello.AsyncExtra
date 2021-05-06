@@ -76,13 +76,13 @@ module AsyncResult =
             }
 
     let traverse : ('a -> AsyncResult<'b, 'err>) -> 'a list -> AsyncResult<'b list, 'err> =
-        fun transformer list ->
+        fun f list ->
             let cons tail head = head :: tail
 
             let rec fold remaining acc =
                 match remaining with
                 | [] -> acc |> List.rev |> singleton
-                | x :: xs -> transformer x |> bind (cons acc >> fold xs)
+                | x :: xs -> f x |> bind (cons acc >> fold xs)
 
             fold list []
 
